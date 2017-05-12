@@ -89,9 +89,17 @@ void CESI_Reward::Start(void)
 
 
 
+int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void *callbackData)
+{
+	TRACE("Callback\n");
+	return 0;
+}
+
 CESI_Lever::CESI_Lever(void)
 {
 	DAQstatus = DAQmxCreateDIChan(m_taskHandle, "/Dev1/port2/line5", "LeverLine", DAQmx_Val_ChanPerLine);
+	DAQCheckStatus();
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, &LeverCallback, NULL);
 	DAQCheckStatus();
 	TRACE("Lever Konstruktor\n");
 }
