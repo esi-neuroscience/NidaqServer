@@ -68,16 +68,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(WindowsSdkDir)bin;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -180,6 +186,7 @@
     <None Include="res\nidaqServerDoc.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DAQmx.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="nidaqServer.h" />
     <ClInclude Include="nidaqServerDoc.h" />
@@ -189,6 +196,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DAQmx.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="nidaqServer.cpp" />
     <ClCompile Include="nidaqServerDoc.cpp" />
