@@ -26,3 +26,13 @@ public:
 	void Start(void);
 };
 
+
+class CESI_Lever :
+	public CDAQmxTask
+{
+public:
+	CESI_Lever(void);
+	~CESI_Lever(void);
+	void Start(void);
+};
+

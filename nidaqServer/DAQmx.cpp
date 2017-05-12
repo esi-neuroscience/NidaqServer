@@ -71,10 +71,41 @@ CESI_Reward::CESI_Reward(void)
 
 CESI_Reward::~CESI_Reward(void)
 {
+	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev1/PFI11");
+	DAQCheckStatus();
+	TRACE("Reward Destruktor\n");
 }
 
 
 void CESI_Reward::Start(void)
+{
+	DAQstatus = DAQmxStartTask(m_taskHandle);
+	DAQCheckStatus();
+	DAQstatus = DAQmxWaitUntilTaskDone(m_taskHandle, -1);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStopTask(m_taskHandle);
+	DAQCheckStatus();
+}
+
+
+
+CESI_Lever::CESI_Lever(void)
+{
+	DAQstatus = DAQmxCreateDIChan(m_taskHandle, "/Dev1/port2/line5", "LeverLine", DAQmx_Val_ChanPerLine);
+	DAQCheckStatus();
+	TRACE("Lever Konstruktor\n");
+}
+
+
+CESI_Lever::~CESI_Lever(void)
+{
+//	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev1/PFI11");
+//	DAQCheckStatus();
+	TRACE("Lever Destruktor\n");
+}
+
+
+void CESI_Lever::Start(void)
 {
 	DAQstatus = DAQmxStartTask(m_taskHandle);
 	DAQCheckStatus();

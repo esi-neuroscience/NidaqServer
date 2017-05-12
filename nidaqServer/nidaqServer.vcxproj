@@ -187,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DAQmx.h" />
+    <ClInclude Include="Lever.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="nidaqServer.h" />
     <ClInclude Include="nidaqServerDoc.h" />
@@ -197,6 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DAQmx.cpp" />
+    <ClCompile Include="Lever.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="nidaqServer.cpp" />
     <ClCompile Include="nidaqServerDoc.cpp" />
