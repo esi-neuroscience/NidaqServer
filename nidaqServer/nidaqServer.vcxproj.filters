@@ -54,6 +54,9 @@
     <ClInclude Include="Lever.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="nidaqServer.cpp">
@@ -75,6 +78,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Lever.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

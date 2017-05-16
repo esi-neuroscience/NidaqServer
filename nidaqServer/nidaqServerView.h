@@ -43,6 +43,9 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+//	CString m_logText;
+	CEdit m_EditLog;
 };
 
 #ifndef _DEBUG  // debug version in nidaqServerView.cpp

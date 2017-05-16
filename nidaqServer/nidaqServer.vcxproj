@@ -84,6 +84,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files %28x86%29\National Instruments\Shared\ExternalCompilerSupport\C\lib64\msvc;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(WindowsSdkDir)bin;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -188,6 +189,7 @@
   <ItemGroup>
     <ClInclude Include="DAQmx.h" />
     <ClInclude Include="Lever.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="nidaqServer.h" />
     <ClInclude Include="nidaqServerDoc.h" />
@@ -199,6 +201,7 @@
   <ItemGroup>
     <ClCompile Include="DAQmx.cpp" />
     <ClCompile Include="Lever.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="nidaqServer.cpp" />
     <ClCompile Include="nidaqServerDoc.cpp" />
@@ -216,4 +219,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="nidaqServer.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

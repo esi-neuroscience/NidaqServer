@@ -1,7 +1,10 @@
 #include "StdAfx.h"
 #include "DAQmx.h"
+#include "Log.h"
 
 #pragma comment(lib, "NIDAQmx.lib")
+
+uInt32 leverLineMask;
 
 static void DAQCheckStatus(void)
 {
@@ -91,17 +94,30 @@ void CESI_Reward::Start(void)
 
 int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void *callbackData)
 {
+	uInt32 value;
+	DAQstatus = DAQmxReadDigitalScalarU32(taskHandle, 0.0, &value, NULL);
+	DAQCheckStatus();
+	value &= leverLineMask;
+	CString temp;
+	temp.Format(_T("Callback Value: %u"), value);
+	CLog::AddToLog(temp);
 	TRACE("Callback\n");
 	return 0;
 }
 
 CESI_Lever::CESI_Lever(void)
 {
-	DAQstatus = DAQmxCreateDIChan(m_taskHandle, "/Dev1/port2/line5", "LeverLine", DAQmx_Val_ChanPerLine);
+// change detection works on port 0 only! The LEVER_LINE is defined in the header file.
+	char leverLine[17] = "Dev1/port0/lineX";
+	leverLine[15] = '0'+LEVER_LINE;
+	DAQstatus = DAQmxCreateDIChan(m_taskHandle, leverLine, "LeverLine", DAQmx_Val_ChanPerLine);
 	DAQCheckStatus();
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, &LeverCallback, NULL);
+	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, leverLine, leverLine, DAQmx_Val_HWTimedSinglePoint, 1);
 	DAQCheckStatus();
-	TRACE("Lever Konstruktor\n");
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, NULL);
+	DAQCheckStatus();
+	leverLineMask = 1 << LEVER_LINE;
+	TRACE("Lever Konstruktor for: %s, Mask: %u\n", leverLine, leverLineMask);
 }
 
 
@@ -109,16 +125,23 @@ CESI_Lever::~CESI_Lever(void)
 {
 //	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev1/PFI11");
 //	DAQCheckStatus();
+	DAQstatus = DAQmxStopTask(m_taskHandle);
+	DAQCheckStatus();
+	// unregister the callback
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
+	DAQCheckStatus();
 	TRACE("Lever Destruktor\n");
 }
 
 
 void CESI_Lever::Start(void)
 {
+	TRACE("ESI Lever Start\n");
+//	CLog::AddToLog(_T("ESI Lever Start"));
 	DAQstatus = DAQmxStartTask(m_taskHandle);
 	DAQCheckStatus();
-	DAQstatus = DAQmxWaitUntilTaskDone(m_taskHandle, -1);
-	DAQCheckStatus();
-	DAQstatus = DAQmxStopTask(m_taskHandle);
-	DAQCheckStatus();
+//	DAQstatus = DAQmxWaitUntilTaskDone(m_taskHandle, -1);
+//	DAQCheckStatus();
+//	DAQstatus = DAQmxStopTask(m_taskHandle);
+//	DAQCheckStatus();
 }

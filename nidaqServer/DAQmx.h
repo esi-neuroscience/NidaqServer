@@ -2,6 +2,9 @@
 
 #include "NIDAQmx.h"
 
+// change detection works on port 0 only!
+const BYTE LEVER_LINE = 5;
+
 static int32 DAQstatus;
 static void DAQCheckStatus(void);
 

@@ -11,11 +11,13 @@
 
 #include "nidaqServerDoc.h"
 #include "nidaqServerView.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+CEdit* CLog::m_Edit;
 
 // CnidaqServerView
 
@@ -31,6 +33,7 @@ CnidaqServerView::CnidaqServerView()
 {
 	// TODO: add construction code here
 
+	//  m_logText = _T("");
 }
 
 CnidaqServerView::~CnidaqServerView()
@@ -40,6 +43,8 @@ CnidaqServerView::~CnidaqServerView()
 void CnidaqServerView::DoDataExchange(CDataExchange* pDX)
 {
 	CFormView::DoDataExchange(pDX);
+	//  DDX_Text(pDX, IDC_EDIT_LOG, m_logText);
+	DDX_Control(pDX, IDC_EDIT_LOG, m_EditLog);
 }
 
 BOOL CnidaqServerView::PreCreateWindow(CREATESTRUCT& cs)
@@ -55,7 +60,7 @@ void CnidaqServerView::OnInitialUpdate()
 	CFormView::OnInitialUpdate();
 	GetParentFrame()->RecalcLayout();
 	ResizeParentToFit();
-
+	if (this->m_hWnd) CLog::m_Edit = &m_EditLog;
 }
 
 
