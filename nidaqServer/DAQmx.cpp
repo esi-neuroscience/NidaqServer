@@ -99,11 +99,18 @@ int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void *cal
 	DAQCheckStatus();
 	value &= leverLineMask;
 	CString temp;
-	temp.Format(_T("Callback Value: %u"), value);
-	CLog::AddToLog(temp);
-	TRACE("Callback\n");
+	if (value)
+	{
+		VERIFY(SetEvent(((CESI_Lever*)callbackData)->m_hPressEvent));
+		CLog::AddToLog(_T("Lever press"));
+	}
+	else
+	{
+		CLog::AddToLog(_T("Lever release"));
+	}
 	return 0;
 }
+
 
 CESI_Lever::CESI_Lever(void)
 {
@@ -114,7 +121,8 @@ CESI_Lever::CESI_Lever(void)
 	DAQCheckStatus();
 	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, leverLine, leverLine, DAQmx_Val_HWTimedSinglePoint, 1);
 	DAQCheckStatus();
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, NULL);
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+//	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback1, NULL);
 	DAQCheckStatus();
 	leverLineMask = 1 << LEVER_LINE;
 	TRACE("Lever Konstruktor for: %s, Mask: %u\n", leverLine, leverLineMask);
@@ -144,4 +152,24 @@ void CESI_Lever::Start(void)
 //	DAQCheckStatus();
 //	DAQstatus = DAQmxStopTask(m_taskHandle);
 //	DAQCheckStatus();
+}
+
+
+int32 CVICALLBACK CESI_Lever::LeverCallback1(TaskHandle taskHandle, int32 signalID, void* callbackData)
+{
+	uInt32 value;
+	DAQstatus = DAQmxReadDigitalScalarU32(taskHandle, 0.0, &value, NULL);
+	DAQCheckStatus();
+	value &= leverLineMask;
+	CString temp;
+	if (value)
+	{
+//		VERIFY(SetEvent(((CLever*) callbackData)->m_hLeverPress));
+		CLog::AddToLog(_T("Lever press"));
+	}
+	else
+	{
+		CLog::AddToLog(_T("Lever release"));
+	}
+	return 0;
 }
