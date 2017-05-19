@@ -36,8 +36,8 @@ class CESI_Lever :
 public:
 	CESI_Lever(void);
 	~CESI_Lever(void);
-	void Start(void);
-	static int32 CVICALLBACK LeverCallback1(TaskHandle taskHandle, int32 signalID, void* callbackData);
+//	static int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void* callbackData);
 	HANDLE m_hPressEvent;
+	HANDLE m_hReleaseEvent;
 };
 

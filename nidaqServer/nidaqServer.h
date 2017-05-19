@@ -8,7 +8,7 @@
 #endif
 
 #include "resource.h"       // main symbols
-#include "lever.h"
+#include "DAQmx.h"
 
 
 // CnidaqServerApp:
@@ -30,7 +30,7 @@ public:
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
 private:
-	CLever m_Lever;
+	CESI_Lever m_Lever;
 };
 
 extern CnidaqServerApp theApp;
