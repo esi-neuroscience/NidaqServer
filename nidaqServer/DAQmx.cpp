@@ -119,8 +119,8 @@ int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void *cal
 
 CESI_Lever::CESI_Lever(void)
 {
-	VERIFY(m_hPressEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverPressEvent")));
-	VERIFY(m_hReleaseEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverReleaseEvent")));
+	VERIFY(m_hPressEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverPress")));
+	VERIFY(m_hReleaseEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverRelease")));
 // change detection works on port 0 only! The LEVER_LINE is defined in the header file.
 	char leverLine[17] = "Dev1/port0/lineX";
 	leverLine[15] = '0'+LEVER_LINE;
