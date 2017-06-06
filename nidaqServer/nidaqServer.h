@@ -31,6 +31,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 private:
 	CESI_Lever m_Lever;
+	CESI_Photodiode m_Photodiode;
 };
 
 extern CnidaqServerApp theApp;

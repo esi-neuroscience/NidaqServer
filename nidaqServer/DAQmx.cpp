@@ -5,6 +5,7 @@
 #pragma comment(lib, "NIDAQmx.lib")
 
 uInt32 leverLineMask;
+uInt32 pdLineMask;
 
 static void DAQCheckStatus(void)
 {
@@ -27,22 +28,22 @@ static void DAQCheckStatus(void)
 	ASSERT(status == 0);
 	TRACE("%s\n", msg);
 	delete msg;
-//	ASSERT(false);
+	ASSERT(false);
 }
 
 CDAQmxTask::CDAQmxTask(void)
 {
 	TRACE("DAQmxTask Konstruktor\n");
-	DAQstatus = DAQmxCreateTask("DAQmxTask", &m_taskHandle);
-	DAQCheckStatus();
+//	DAQstatus = DAQmxCreateTask("DAQmxTask", &m_taskHandle);
+//	DAQCheckStatus();
 }
 
 
 CDAQmxTask::~CDAQmxTask(void)
 {
-	DAQstatus = DAQmxClearTask(m_taskHandle);
-	DAQCheckStatus();
-	TRACE("DAQmxTask Destruktor\n");
+//	DAQstatus = DAQmxClearTask(m_taskHandle);
+//	DAQCheckStatus();
+//	TRACE("DAQmxTask Destruktor\n");
 }
 
 
@@ -119,6 +120,9 @@ int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void *cal
 
 CESI_Lever::CESI_Lever(void)
 {
+	TRACE("LeverTask Konstruktor\n");
+	DAQstatus = DAQmxCreateTask("LeverTask", &m_taskHandle);
+	DAQCheckStatus();
 	VERIFY(m_hPressEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverPress")));
 	VERIFY(m_hReleaseEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverRelease")));
 // change detection works on port 0 only! The LEVER_LINE is defined in the header file.
@@ -147,4 +151,41 @@ CESI_Lever::~CESI_Lever(void)
 	VERIFY(CloseHandle(m_hPressEvent));
 	VERIFY(CloseHandle(m_hReleaseEvent));
 	TRACE("Lever Destruktor\n");
+}
+
+
+
+CESI_Photodiode::CESI_Photodiode(void)
+{
+	TRACE("PhotodiodeTask Konstruktor\n");
+	DAQstatus = DAQmxCreateTask("PhotodiodeTask", &m_taskHandle);
+	DAQCheckStatus();
+	VERIFY(m_hOnEvent = CreateEvent(NULL, FALSE, FALSE, _T("PhotodiodeOn")));
+	VERIFY(m_hOffEvent = CreateEvent(NULL, FALSE, FALSE, _T("PhotodiodeOff")));
+// change detection works on port 0 only! The PHOTODIODE_LINE is defined in the header file.
+	char pdLine[17] = "Dev1/port0/lineX";
+	pdLine[15] = '0'+PHOTODIODE_LINE;
+	DAQstatus = DAQmxCreateDIChan(m_taskHandle, pdLine, "pdLine", DAQmx_Val_ChanPerLine);
+	DAQCheckStatus();
+	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, pdLine, pdLine, DAQmx_Val_HWTimedSinglePoint, 0);
+	DAQCheckStatus();
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	DAQCheckStatus();
+	pdLineMask = 1 << PHOTODIODE_LINE;
+	TRACE("Photodiode Konstruktor for: %s, Mask: %u\n", pdLine, pdLineMask);
+	DAQstatus = DAQmxStartTask(m_taskHandle);
+	DAQCheckStatus();
+}
+
+
+CESI_Photodiode::~CESI_Photodiode(void)
+{
+	DAQstatus = DAQmxStopTask(m_taskHandle);
+	DAQCheckStatus();
+	// unregister the callback
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
+	DAQCheckStatus();
+	VERIFY(CloseHandle(m_hOnEvent));
+	VERIFY(CloseHandle(m_hOffEvent));
+	TRACE("Photodiode Destruktor\n");
 }

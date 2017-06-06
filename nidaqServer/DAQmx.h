@@ -4,6 +4,7 @@
 
 // change detection works on port 0 only!
 const BYTE LEVER_LINE = 5;
+const BYTE PHOTODIODE_LINE = 6;
 
 static int32 DAQstatus;
 static void DAQCheckStatus(void);
@@ -39,5 +40,17 @@ public:
 //	static int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void* callbackData);
 	HANDLE m_hPressEvent;
 	HANDLE m_hReleaseEvent;
+};
+
+
+class CESI_Photodiode :
+	public CDAQmxTask
+{
+public:
+	CESI_Photodiode(void);
+	~CESI_Photodiode(void);
+//	static int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void* callbackData);
+	HANDLE m_hOnEvent;
+	HANDLE m_hOffEvent;
 };
 
