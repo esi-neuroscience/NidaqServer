@@ -114,12 +114,16 @@ BOOL CnidaqServerApp::InitInstance()
 	m_pMainWnd->UpdateWindow();
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
+	m_pLever = new CESI_Lever();
+	m_pPhotodiode = new CESI_Photodiode();
 	return TRUE;
 }
 
 int CnidaqServerApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
+	delete m_pLever;
+	delete m_pPhotodiode;
 	AfxOleTerm(FALSE);
 
 	return CWinApp::ExitInstance();

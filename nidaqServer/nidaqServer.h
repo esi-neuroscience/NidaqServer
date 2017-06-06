@@ -30,8 +30,8 @@ public:
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
 private:
-	CESI_Lever m_Lever;
-	CESI_Photodiode m_Photodiode;
+	CESI_Lever* m_pLever;
+	CESI_Photodiode* m_pPhotodiode;
 };
 
 extern CnidaqServerApp theApp;
