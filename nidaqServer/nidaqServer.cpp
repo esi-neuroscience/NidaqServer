@@ -116,12 +116,14 @@ BOOL CnidaqServerApp::InitInstance()
 	//  In an SDI app, this should occur after ProcessShellCommand
 	m_pLever = new CESI_Lever();
 	m_pPhotodiode = new CESI_Photodiode();
+	m_pChangeDetection = new CChangeDetection();
 	return TRUE;
 }
 
 int CnidaqServerApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
+	delete m_pChangeDetection;
 	delete m_pLever;
 	delete m_pPhotodiode;
 	AfxOleTerm(FALSE);

@@ -32,6 +32,7 @@ public:
 private:
 	CESI_Lever* m_pLever;
 	CESI_Photodiode* m_pPhotodiode;
+	CChangeDetection* m_pChangeDetection;
 };
 
 extern CnidaqServerApp theApp;

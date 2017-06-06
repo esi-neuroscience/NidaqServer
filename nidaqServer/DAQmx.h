@@ -54,3 +54,11 @@ public:
 	HANDLE m_hOffEvent;
 };
 
+class CChangeDetection :
+	public CDAQmxTask
+{
+public:
+	CChangeDetection(void);
+	~CChangeDetection(void);
+};
+

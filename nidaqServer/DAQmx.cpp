@@ -132,8 +132,8 @@ CESI_Lever::CESI_Lever(void)
 	DAQCheckStatus();
 	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, leverLine, leverLine, DAQmx_Val_HWTimedSinglePoint, 0);
 	DAQCheckStatus();
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
-	DAQCheckStatus();
+	//DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	//DAQCheckStatus();
 	leverLineMask = 1 << LEVER_LINE;
 	TRACE("Lever Konstruktor for: %s, Mask: %u\n", leverLine, leverLineMask);
 	DAQstatus = DAQmxStartTask(m_taskHandle);
@@ -169,8 +169,8 @@ CESI_Photodiode::CESI_Photodiode(void)
 	DAQCheckStatus();
 	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, pdLine, pdLine, DAQmx_Val_HWTimedSinglePoint, 0);
 	DAQCheckStatus();
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
-	DAQCheckStatus();
+	//DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	//DAQCheckStatus();
 	pdLineMask = 1 << PHOTODIODE_LINE;
 	TRACE("Photodiode Konstruktor for: %s, Mask: %u\n", pdLine, pdLineMask);
 	DAQstatus = DAQmxStartTask(m_taskHandle);
@@ -183,9 +183,28 @@ CESI_Photodiode::~CESI_Photodiode(void)
 	DAQstatus = DAQmxStopTask(m_taskHandle);
 	DAQCheckStatus();
 	// unregister the callback
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
-	DAQCheckStatus();
+	//DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
+	//DAQCheckStatus();
 	VERIFY(CloseHandle(m_hOnEvent));
 	VERIFY(CloseHandle(m_hOffEvent));
 	TRACE("Photodiode Destruktor\n");
+}
+
+
+CChangeDetection::CChangeDetection(void)
+{
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStartTask(m_taskHandle);
+	DAQCheckStatus();
+}
+
+
+CChangeDetection::~CChangeDetection(void)
+{
+	DAQstatus = DAQmxStopTask(m_taskHandle);
+	DAQCheckStatus();
+	// unregister the callback
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
+	DAQCheckStatus();
 }
