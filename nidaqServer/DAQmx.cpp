@@ -1,11 +1,15 @@
 #include "StdAfx.h"
 #include "DAQmx.h"
 #include "Log.h"
+#include <strsafe.h>
 
 #pragma comment(lib, "NIDAQmx.lib")
 
 uInt32 leverLineMask;
 uInt32 pdLineMask;
+
+TaskHandle CChangeDetection::m_taskHandle;
+char CChangeDetection::m_lines[136] = {0};
 
 static void DAQCheckStatus(void)
 {
@@ -126,18 +130,19 @@ CESI_Lever::CESI_Lever(void)
 	VERIFY(m_hPressEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverPress")));
 	VERIFY(m_hReleaseEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverRelease")));
 // change detection works on port 0 only! The LEVER_LINE is defined in the header file.
-	char leverLine[17] = "Dev1/port0/lineX";
-	leverLine[15] = '0'+LEVER_LINE;
-	DAQstatus = DAQmxCreateDIChan(m_taskHandle, leverLine, "LeverLine", DAQmx_Val_ChanPerLine);
-	DAQCheckStatus();
-	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, leverLine, leverLine, DAQmx_Val_HWTimedSinglePoint, 0);
-	DAQCheckStatus();
-	//DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	CChangeDetection::AddLine(LEVER_LINE);
+//	char leverLine[17] = "Dev1/port0/lineX";
+//	leverLine[15] = '0'+LEVER_LINE;
+	//DAQstatus = DAQmxCreateDIChan(m_taskHandle, leverLine, "LeverLine", DAQmx_Val_ChanPerLine);
 	//DAQCheckStatus();
-	leverLineMask = 1 << LEVER_LINE;
-	TRACE("Lever Konstruktor for: %s, Mask: %u\n", leverLine, leverLineMask);
-	DAQstatus = DAQmxStartTask(m_taskHandle);
-	DAQCheckStatus();
+	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, leverLine, leverLine, DAQmx_Val_HWTimedSinglePoint, 0);
+	//DAQCheckStatus();
+	////DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	////DAQCheckStatus();
+	//leverLineMask = 1 << LEVER_LINE;
+	//TRACE("Lever Konstruktor for: %s, Mask: %u\n", leverLine, leverLineMask);
+	//DAQstatus = DAQmxStartTask(m_taskHandle);
+	//DAQCheckStatus();
 }
 
 
@@ -163,18 +168,19 @@ CESI_Photodiode::CESI_Photodiode(void)
 	VERIFY(m_hOnEvent = CreateEvent(NULL, FALSE, FALSE, _T("PhotodiodeOn")));
 	VERIFY(m_hOffEvent = CreateEvent(NULL, FALSE, FALSE, _T("PhotodiodeOff")));
 // change detection works on port 0 only! The PHOTODIODE_LINE is defined in the header file.
-	char pdLine[17] = "Dev1/port0/lineX";
-	pdLine[15] = '0'+PHOTODIODE_LINE;
-	DAQstatus = DAQmxCreateDIChan(m_taskHandle, pdLine, "pdLine", DAQmx_Val_ChanPerLine);
-	DAQCheckStatus();
-	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, pdLine, pdLine, DAQmx_Val_HWTimedSinglePoint, 0);
-	DAQCheckStatus();
-	//DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	CChangeDetection::AddLine(PHOTODIODE_LINE);
+	//char pdLine[17] = "Dev1/port0/lineX";
+	//pdLine[15] = '0'+PHOTODIODE_LINE;
+	//DAQstatus = DAQmxCreateDIChan(m_taskHandle, pdLine, "pdLine", DAQmx_Val_ChanPerLine);
 	//DAQCheckStatus();
-	pdLineMask = 1 << PHOTODIODE_LINE;
-	TRACE("Photodiode Konstruktor for: %s, Mask: %u\n", pdLine, pdLineMask);
-	DAQstatus = DAQmxStartTask(m_taskHandle);
-	DAQCheckStatus();
+	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, pdLine, pdLine, DAQmx_Val_HWTimedSinglePoint, 0);
+	//DAQCheckStatus();
+	////DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	////DAQCheckStatus();
+	//pdLineMask = 1 << PHOTODIODE_LINE;
+	//TRACE("Photodiode Konstruktor for: %s, Mask: %u\n", pdLine, pdLineMask);
+	//DAQstatus = DAQmxStartTask(m_taskHandle);
+	//DAQCheckStatus();
 }
 
 
@@ -193,10 +199,6 @@ CESI_Photodiode::~CESI_Photodiode(void)
 
 CChangeDetection::CChangeDetection(void)
 {
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
-	DAQCheckStatus();
-	DAQstatus = DAQmxStartTask(m_taskHandle);
-	DAQCheckStatus();
 }
 
 
@@ -208,3 +210,26 @@ CChangeDetection::~CChangeDetection(void)
 	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
 	DAQCheckStatus();
 }
+
+void CChangeDetection::AddLine(BYTE lineNumber)
+{
+	char lineName[17] = "Dev1/port0/lineX";
+	lineName[15] = '0'+lineNumber;
+	if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");
+	StringCbCatA(m_lines, 136, lineName);
+	TRACE("Channel: %s\n", m_lines);
+}
+
+void CChangeDetection::Start(void)
+{
+//	DAQstatus = DAQmxCreateDIChan(m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanPerLine);
+	DAQstatus = DAQmxCreateDIChan(m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+	DAQCheckStatus();
+	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, m_lines, m_lines, DAQmx_Val_HWTimedSinglePoint, 0);
+	DAQCheckStatus();
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStartTask(m_taskHandle);
+	DAQCheckStatus();
+}
+

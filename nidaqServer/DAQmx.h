@@ -31,8 +31,21 @@ public:
 };
 
 
+class CChangeDetection
+{
+public:
+	CChangeDetection(void);
+	~CChangeDetection(void);
+	void Start(void);
+protected:
+	static void AddLine(BYTE lineNumber);
+	static TaskHandle m_taskHandle;
+	static char m_lines[];
+};
+
+
 class CESI_Lever :
-	public CDAQmxTask
+	public CChangeDetection
 {
 public:
 	CESI_Lever(void);
@@ -44,7 +57,7 @@ public:
 
 
 class CESI_Photodiode :
-	public CDAQmxTask
+	public CChangeDetection
 {
 public:
 	CESI_Photodiode(void);
@@ -52,13 +65,5 @@ public:
 //	static int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void* callbackData);
 	HANDLE m_hOnEvent;
 	HANDLE m_hOffEvent;
-};
-
-class CChangeDetection :
-	public CDAQmxTask
-{
-public:
-	CChangeDetection(void);
-	~CChangeDetection(void);
 };
 

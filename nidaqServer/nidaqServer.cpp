@@ -114,9 +114,10 @@ BOOL CnidaqServerApp::InitInstance()
 	m_pMainWnd->UpdateWindow();
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
+	m_pChangeDetection = new CChangeDetection();
 	m_pLever = new CESI_Lever();
 	m_pPhotodiode = new CESI_Photodiode();
-	m_pChangeDetection = new CChangeDetection();
+	m_pChangeDetection->Start();
 	return TRUE;
 }
 
