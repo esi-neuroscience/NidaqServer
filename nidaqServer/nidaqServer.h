@@ -30,8 +30,6 @@ public:
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
 private:
-	CESI_Lever* m_pLever;
-	CESI_Photodiode* m_pPhotodiode;
 	CChangeDetection* m_pChangeDetection;
 };
 

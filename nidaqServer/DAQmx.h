@@ -31,39 +31,33 @@ public:
 };
 
 
+class CChangeDetectionLine
+{
+public:
+	CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName);
+	~CChangeDetectionLine(void);
+	BYTE m_lineNumber;
+	BYTE m_mask;
+	HANDLE m_onEvent;
+	HANDLE m_offEvent;
+	char* m_onName;
+	char* m_offName;
+};
+
+
 class CChangeDetection
 {
 public:
 	CChangeDetection(void);
 	~CChangeDetection(void);
-	void Start(void);
-protected:
-	static void AddLine(BYTE lineNumber);
+	static void AddLine(BYTE lineNumber, char* onName, char* offName);
+	static void Start(void);
+	static int32 CVICALLBACK ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData);
+private:
 	static TaskHandle m_taskHandle;
 	static char m_lines[];
+	static BYTE m_nLines;
+	static BYTE m_lineMask;
+	static uInt32 m_value;
+	static CChangeDetectionLine* m_pLines[8];
 };
-
-
-class CESI_Lever :
-	public CChangeDetection
-{
-public:
-	CESI_Lever(void);
-	~CESI_Lever(void);
-//	static int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void* callbackData);
-	HANDLE m_hPressEvent;
-	HANDLE m_hReleaseEvent;
-};
-
-
-class CESI_Photodiode :
-	public CChangeDetection
-{
-public:
-	CESI_Photodiode(void);
-	~CESI_Photodiode(void);
-//	static int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void* callbackData);
-	HANDLE m_hOnEvent;
-	HANDLE m_hOffEvent;
-};
-

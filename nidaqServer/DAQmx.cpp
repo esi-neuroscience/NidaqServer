@@ -5,11 +5,12 @@
 
 #pragma comment(lib, "NIDAQmx.lib")
 
-uInt32 leverLineMask;
-uInt32 pdLineMask;
-
 TaskHandle CChangeDetection::m_taskHandle;
 char CChangeDetection::m_lines[136] = {0};
+BYTE CChangeDetection::m_nLines = 0;
+BYTE CChangeDetection::m_lineMask = 0;
+uInt32 CChangeDetection::m_value;
+CChangeDetectionLine* CChangeDetection::m_pLines[8];
 
 static void DAQCheckStatus(void)
 {
@@ -97,108 +98,40 @@ void CESI_Reward::Start(void)
 
 
 
-int32 CVICALLBACK LeverCallback(TaskHandle taskHandle, int32 signalID, void *callbackData)
+int32 CVICALLBACK CChangeDetection::ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData)
 {
 	uInt32 value = 0;
-	int32 sampsRead;
-	int32 numBytesPerSamp;
 	DAQstatus = DAQmxReadDigitalScalarU32(taskHandle, 0.0, &value, NULL);
 	DAQCheckStatus();
-	value &= leverLineMask;
-	CString temp;
-	if (value)
+	value &= m_lineMask;
+	uInt32 changedBits = value ^ m_value;
+	for (BYTE i=0; i<m_nLines; i++)
 	{
-		VERIFY(ResetEvent(((CESI_Lever*)callbackData)->m_hReleaseEvent));
-		VERIFY(SetEvent(((CESI_Lever*)callbackData)->m_hPressEvent));
-		CLog::AddToLog(_T("Lever press"));
+		if (m_pLines[i]->m_mask & changedBits)
+		{
+			if (value & m_pLines[i]->m_mask)
+			{
+				VERIFY(ResetEvent(m_pLines[i]->m_offEvent));
+				VERIFY(SetEvent(m_pLines[i]->m_onEvent));
+				CLog::AddToLog(CString(m_pLines[i]->m_onName));
+			}
+			else
+			{
+				VERIFY(ResetEvent(m_pLines[i]->m_onEvent));
+				VERIFY(SetEvent(m_pLines[i]->m_offEvent));
+				CLog::AddToLog(CString(m_pLines[i]->m_offName));
+			}
+		}
 	}
-	else
-	{
-		VERIFY(ResetEvent(((CESI_Lever*)callbackData)->m_hPressEvent));
-		VERIFY(SetEvent(((CESI_Lever*)callbackData)->m_hReleaseEvent));
-		CLog::AddToLog(_T("Lever release"));
-	}
+	m_value = value;
 	return 0;
-}
-
-
-CESI_Lever::CESI_Lever(void)
-{
-	TRACE("LeverTask Konstruktor\n");
-	DAQstatus = DAQmxCreateTask("LeverTask", &m_taskHandle);
-	DAQCheckStatus();
-	VERIFY(m_hPressEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverPress")));
-	VERIFY(m_hReleaseEvent = CreateEvent(NULL, FALSE, FALSE, _T("LeverRelease")));
-// change detection works on port 0 only! The LEVER_LINE is defined in the header file.
-	CChangeDetection::AddLine(LEVER_LINE);
-//	char leverLine[17] = "Dev1/port0/lineX";
-//	leverLine[15] = '0'+LEVER_LINE;
-	//DAQstatus = DAQmxCreateDIChan(m_taskHandle, leverLine, "LeverLine", DAQmx_Val_ChanPerLine);
-	//DAQCheckStatus();
-	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, leverLine, leverLine, DAQmx_Val_HWTimedSinglePoint, 0);
-	//DAQCheckStatus();
-	////DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
-	////DAQCheckStatus();
-	//leverLineMask = 1 << LEVER_LINE;
-	//TRACE("Lever Konstruktor for: %s, Mask: %u\n", leverLine, leverLineMask);
-	//DAQstatus = DAQmxStartTask(m_taskHandle);
-	//DAQCheckStatus();
-}
-
-
-CESI_Lever::~CESI_Lever(void)
-{
-	DAQstatus = DAQmxStopTask(m_taskHandle);
-	DAQCheckStatus();
-	// unregister the callback
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
-	DAQCheckStatus();
-	VERIFY(CloseHandle(m_hPressEvent));
-	VERIFY(CloseHandle(m_hReleaseEvent));
-	TRACE("Lever Destruktor\n");
-}
-
-
-
-CESI_Photodiode::CESI_Photodiode(void)
-{
-	TRACE("PhotodiodeTask Konstruktor\n");
-	DAQstatus = DAQmxCreateTask("PhotodiodeTask", &m_taskHandle);
-	DAQCheckStatus();
-	VERIFY(m_hOnEvent = CreateEvent(NULL, FALSE, FALSE, _T("PhotodiodeOn")));
-	VERIFY(m_hOffEvent = CreateEvent(NULL, FALSE, FALSE, _T("PhotodiodeOff")));
-// change detection works on port 0 only! The PHOTODIODE_LINE is defined in the header file.
-	CChangeDetection::AddLine(PHOTODIODE_LINE);
-	//char pdLine[17] = "Dev1/port0/lineX";
-	//pdLine[15] = '0'+PHOTODIODE_LINE;
-	//DAQstatus = DAQmxCreateDIChan(m_taskHandle, pdLine, "pdLine", DAQmx_Val_ChanPerLine);
-	//DAQCheckStatus();
-	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, pdLine, pdLine, DAQmx_Val_HWTimedSinglePoint, 0);
-	//DAQCheckStatus();
-	////DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
-	////DAQCheckStatus();
-	//pdLineMask = 1 << PHOTODIODE_LINE;
-	//TRACE("Photodiode Konstruktor for: %s, Mask: %u\n", pdLine, pdLineMask);
-	//DAQstatus = DAQmxStartTask(m_taskHandle);
-	//DAQCheckStatus();
-}
-
-
-CESI_Photodiode::~CESI_Photodiode(void)
-{
-	DAQstatus = DAQmxStopTask(m_taskHandle);
-	DAQCheckStatus();
-	// unregister the callback
-	//DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
-	//DAQCheckStatus();
-	VERIFY(CloseHandle(m_hOnEvent));
-	VERIFY(CloseHandle(m_hOffEvent));
-	TRACE("Photodiode Destruktor\n");
 }
 
 
 CChangeDetection::CChangeDetection(void)
 {
+	DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
+	DAQCheckStatus();
 }
 
 
@@ -209,27 +142,53 @@ CChangeDetection::~CChangeDetection(void)
 	// unregister the callback
 	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, NULL, NULL);
 	DAQCheckStatus();
+	for (BYTE i=0; i<m_nLines; i++) delete m_pLines[i];
 }
 
-void CChangeDetection::AddLine(BYTE lineNumber)
+
+void CChangeDetection::Start(void)
+{
+	DAQstatus = DAQmxCreateDIChan(m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+	DAQCheckStatus();
+	DAQstatus = DAQmxReadDigitalScalarU32(m_taskHandle, 0.0, &m_value, NULL);
+	DAQCheckStatus();
+	m_value &= m_lineMask;
+	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, m_lines, m_lines, DAQmx_Val_HWTimedSinglePoint, 0);
+	DAQCheckStatus();
+	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, ChangeDetectionCallback, NULL);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStartTask(m_taskHandle);
+	DAQCheckStatus();
+}
+
+
+
+void CChangeDetection::AddLine(BYTE lineNumber, char* onName, char* offName)
 {
 	char lineName[17] = "Dev1/port0/lineX";
 	lineName[15] = '0'+lineNumber;
 	if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");
 	StringCbCatA(m_lines, 136, lineName);
 	TRACE("Channel: %s\n", m_lines);
+	m_pLines[m_nLines] = new CChangeDetectionLine(lineNumber, onName, offName);
+	m_lineMask |= m_pLines[m_nLines++]->m_mask;
+	TRACE("Maske: %u\n", m_lineMask);
 }
 
-void CChangeDetection::Start(void)
+
+CChangeDetectionLine::CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName)
 {
-//	DAQstatus = DAQmxCreateDIChan(m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanPerLine);
-	DAQstatus = DAQmxCreateDIChan(m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
-	DAQCheckStatus();
-	DAQstatus = DAQmxCfgChangeDetectionTiming(m_taskHandle, m_lines, m_lines, DAQmx_Val_HWTimedSinglePoint, 0);
-	DAQCheckStatus();
-	DAQstatus = DAQmxRegisterSignalEvent(m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, LeverCallback, this);
-	DAQCheckStatus();
-	DAQstatus = DAQmxStartTask(m_taskHandle);
-	DAQCheckStatus();
+	TRACE("ChangeDetectionLine Konstruktor\n");
+	m_mask = (1 << lineNumber);
+	VERIFY(m_onEvent = CreateEventA(NULL, FALSE, FALSE, onName));
+	VERIFY(m_offEvent = CreateEventA(NULL, FALSE, FALSE, offName));
+	m_onName = onName;
+	m_offName = offName;
 }
 
+CChangeDetectionLine::~CChangeDetectionLine(void)
+{
+	TRACE("ChangeDetectionLine Destruktor\n");
+	VERIFY(CloseHandle(m_onEvent));
+	VERIFY(CloseHandle(m_offEvent));
+}
