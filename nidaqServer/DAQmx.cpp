@@ -104,25 +104,7 @@ int32 CVICALLBACK CChangeDetection::ChangeDetectionCallback(TaskHandle taskHandl
 	DAQstatus = DAQmxReadDigitalScalarU32(taskHandle, 0.0, &value, NULL);
 	DAQCheckStatus();
 	value &= m_lineMask;
-	uInt32 changedBits = value ^ m_value;
-	for (BYTE i=0; i<m_nLines; i++)
-	{
-		if (m_pLines[i]->m_mask & changedBits)
-		{
-			if (value & m_pLines[i]->m_mask)
-			{
-				VERIFY(ResetEvent(m_pLines[i]->m_offEvent));
-				VERIFY(SetEvent(m_pLines[i]->m_onEvent));
-				CLog::AddToLog(CString(m_pLines[i]->m_onName));
-			}
-			else
-			{
-				VERIFY(ResetEvent(m_pLines[i]->m_onEvent));
-				VERIFY(SetEvent(m_pLines[i]->m_offEvent));
-				CLog::AddToLog(CString(m_pLines[i]->m_offName));
-			}
-		}
-	}
+	for (BYTE i=0; i<m_nLines; i++) m_pLines[i]->SignalEvent(value, value ^ m_value);
 	m_value = value;
 	return 0;
 }
@@ -191,4 +173,23 @@ CChangeDetectionLine::~CChangeDetectionLine(void)
 	TRACE("ChangeDetectionLine Destruktor\n");
 	VERIFY(CloseHandle(m_onEvent));
 	VERIFY(CloseHandle(m_offEvent));
+}
+
+void CChangeDetectionLine::SignalEvent(uInt32 value, uInt32 changedBits)
+{
+	if (m_mask & changedBits)
+	{
+		if (value & m_mask)
+		{
+			VERIFY(ResetEvent(m_offEvent));
+			VERIFY(SetEvent(m_onEvent));
+			CLog::AddToLog(CString(m_onName));
+		}
+		else
+		{
+			VERIFY(ResetEvent(m_onEvent));
+			VERIFY(SetEvent(m_offEvent));
+			CLog::AddToLog(CString(m_offName));
+		}
+	}
 }

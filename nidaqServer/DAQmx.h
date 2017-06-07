@@ -42,6 +42,7 @@ public:
 	HANDLE m_offEvent;
 	char* m_onName;
 	char* m_offName;
+	void SignalEvent(uInt32 value, uInt32 changedBits);
 };
 
 
