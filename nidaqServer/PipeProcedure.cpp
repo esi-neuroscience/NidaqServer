@@ -1,15 +1,14 @@
 #include "stdafx.h"
 #include "PipeProcedure.h"
-#include "StimServer.h"
-#include "StimServerDoc.h"
+#include "nidaqServer.h"
 
 HANDLE hPipe;
 
 UINT PipeProcedure( LPVOID pParam ) {
 	
-	extern CStimServerApp theApp;
+	extern CnidaqServerApp theApp;
 	HRESULT hr = S_OK;
-	short key;
+//	short key;
 	COMMANDBUFFER commandBuffer;
 	DWORD messageLength;
 	hr = CoInitializeEx(
@@ -17,13 +16,13 @@ UINT PipeProcedure( LPVOID pParam ) {
 		COINIT_MULTITHREADED);
 	ASSERT(hr == S_OK);
 
-	POSITION pos = theApp.GetFirstDocTemplatePosition();
-	CDocTemplate* temp = theApp.GetNextDocTemplate(pos);
-	pos = temp->GetFirstDocPosition();
-	CStimServerDoc* pDoc = (CStimServerDoc*) temp->GetNextDoc(pos);
+	//POSITION pos = theApp.GetFirstDocTemplatePosition();
+	//CDocTemplate* temp = theApp.GetNextDocTemplate(pos);
+	//pos = temp->GetFirstDocPosition();
+	//CStimServerDoc* pDoc = (CStimServerDoc*) temp->GetNextDoc(pos);
 
 	hPipe = CreateNamedPipe(
-		_T("\\\\.\\pipe\\StimServerPipe"),
+		_T("\\\\.\\pipe\\nidaqServerPipe"),
 		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
 		1,			// max. number of instances
@@ -57,11 +56,25 @@ UINT PipeProcedure( LPVOID pParam ) {
 			if (error == ERROR_BROKEN_PIPE) break;
 			ASSERT(error == 0);
 //			TRACE("Message received. Length:%u; Key: %u\n", messageLength, commandBuffer.key);
-			key = pDoc->Command(commandBuffer.key, &commandBuffer.body[0], messageLength-2);
-			if (key != -1) {
-				DWORD bytesWritten;
-				VERIFY(WriteFile(hPipe, &key, 2, &bytesWritten, NULL));
-				ASSERT(bytesWritten == 2);
+			//key = pDoc->Command(commandBuffer.key, &commandBuffer.body[0], messageLength-2);
+			//if (key != -1) {
+			//	DWORD bytesWritten;
+			//	VERIFY(WriteFile(hPipe, &key, 2, &bytesWritten, NULL));
+			//	ASSERT(bytesWritten == 2);
+			//}
+			switch (commandBuffer.type)
+			{
+			case 1:	// add line to change detection
+				{
+				char* onName = (char*) &commandBuffer.body[1];
+				char* offName = (char*) &commandBuffer.body[2+strlen(onName)];
+				TRACE("EventNames: %s %s\n", onName, offName);
+				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
+				}
+				break;
+			case 2: // start change detection
+				theApp.m_pChangeDetection->Start();
+				break;
 			}
 		}
 		VERIFY(DisconnectNamedPipe(hPipe));	// neccessary for re-connect

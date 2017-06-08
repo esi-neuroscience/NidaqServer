@@ -1,12 +1,12 @@
 UINT PipeProcedure( LPVOID pParam );
 void WritePipe(void* buffer, unsigned char bytesToWrite);
 
-#define BUFFERSIZE 128
+#define BUFFERSIZE 32
 
 union COMMANDBUFFER {
 	unsigned char command[BUFFERSIZE];
 	struct {
-		WORD key;
-		unsigned char body[BUFFERSIZE-2];
+		BYTE type;
+		unsigned char body[BUFFERSIZE-1];
 	};
 };

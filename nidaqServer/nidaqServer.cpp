@@ -10,6 +10,7 @@
 
 #include "nidaqServerDoc.h"
 #include "nidaqServerView.h"
+#include "PipeProcedure.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -109,7 +110,7 @@ BOOL CnidaqServerApp::InitInstance()
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 
-	m_pPipeThread = AfxBeginThread(PipeProcedure, NULL);
+	AfxBeginThread(PipeProcedure, NULL);
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOWMINIMIZED);
 	m_pMainWnd->UpdateWindow();
@@ -117,9 +118,9 @@ BOOL CnidaqServerApp::InitInstance()
 	//  In an SDI app, this should occur after ProcessShellCommand
 	m_pChangeDetection = new CChangeDetection();
 
-	m_pChangeDetection->AddLine(5, "LeverPress", "LeverRelease");
-	m_pChangeDetection->AddLine(6, "PhotodiodeOn", "PhotodiodeOff");
-	m_pChangeDetection->Start();
+	//m_pChangeDetection->AddLine(5, "LeverPress", "LeverRelease");
+	//m_pChangeDetection->AddLine(6, "PhotodiodeOn", "PhotodiodeOff");
+	//m_pChangeDetection->Start();
 
 	return TRUE;
 }

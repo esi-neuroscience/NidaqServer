@@ -193,6 +193,7 @@
     <ClInclude Include="nidaqServer.h" />
     <ClInclude Include="nidaqServerDoc.h" />
     <ClInclude Include="nidaqServerView.h" />
+    <ClInclude Include="PipeProcedure.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -204,6 +205,7 @@
     <ClCompile Include="nidaqServer.cpp" />
     <ClCompile Include="nidaqServerDoc.cpp" />
     <ClCompile Include="nidaqServerView.cpp" />
+    <ClCompile Include="PipeProcedure.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -29,7 +29,8 @@ public:
 // Implementation
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
-private:
+//private:
+public:
 	CChangeDetection* m_pChangeDetection;
 };
 
