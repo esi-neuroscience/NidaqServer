@@ -109,6 +109,7 @@ BOOL CnidaqServerApp::InitInstance()
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 
+	m_pPipeThread = AfxBeginThread(PipeProcedure, NULL);
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOWMINIMIZED);
 	m_pMainWnd->UpdateWindow();
