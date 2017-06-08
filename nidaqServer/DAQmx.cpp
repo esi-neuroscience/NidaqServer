@@ -160,12 +160,19 @@ void CChangeDetection::AddLine(BYTE lineNumber, char* onName, char* offName)
 
 CChangeDetectionLine::CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName)
 {
+	size_t bufferSize;
 	TRACE("ChangeDetectionLine Konstruktor\n");
 	m_mask = (1 << lineNumber);
 	VERIFY(m_onEvent = CreateEventA(NULL, FALSE, FALSE, onName));
 	VERIFY(m_offEvent = CreateEventA(NULL, FALSE, FALSE, offName));
-	m_onName = onName;
-	m_offName = offName;
+	bufferSize = strlen(onName)+1;
+	m_onName = new char[bufferSize];
+	StringCchCopyA(m_onName, bufferSize, onName);
+	bufferSize = strlen(offName)+1;
+	m_offName = new char[strlen(offName)+1];
+	StringCchCopyA(m_offName, bufferSize, offName);
+	//m_onName = onName;
+	//m_offName = offName;
 }
 
 CChangeDetectionLine::~CChangeDetectionLine(void)
@@ -173,6 +180,8 @@ CChangeDetectionLine::~CChangeDetectionLine(void)
 	TRACE("ChangeDetectionLine Destruktor\n");
 	VERIFY(CloseHandle(m_onEvent));
 	VERIFY(CloseHandle(m_offEvent));
+	delete m_onName;
+	delete m_offName;
 }
 
 void CChangeDetectionLine::SignalEvent(uInt32 value, uInt32 changedBits)
@@ -192,4 +201,13 @@ void CChangeDetectionLine::SignalEvent(uInt32 value, uInt32 changedBits)
 			CLog::AddToLog(CString(m_offName));
 		}
 	}
+}
+
+
+bool CChangeDetection::Running(void)
+{
+	bool32 isTaskDone;
+	DAQstatus = DAQmxIsTaskDone(m_taskHandle, &isTaskDone);
+	DAQCheckStatus();
+	return !isTaskDone;
 }

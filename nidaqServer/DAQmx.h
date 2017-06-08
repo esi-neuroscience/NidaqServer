@@ -61,4 +61,6 @@ private:
 	static BYTE m_lineMask;
 	static uInt32 m_value;
 	static CChangeDetectionLine* m_pLines[8];
+public:
+	static bool Running(void);
 };

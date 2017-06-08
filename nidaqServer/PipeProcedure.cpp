@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PipeProcedure.h"
 #include "nidaqServer.h"
+#include "Log.h"
 
 HANDLE hPipe;
 
@@ -65,6 +66,11 @@ UINT PipeProcedure( LPVOID pParam ) {
 			switch (commandBuffer.type)
 			{
 			case 1:	// add line to change detection
+				if (CChangeDetection::Running())
+				{
+					CLog::AddToLog(CString("Will not add line to running task."));
+				}
+				else
 				{
 				char* onName = (char*) &commandBuffer.body[1];
 				char* offName = (char*) &commandBuffer.body[2+strlen(onName)];
@@ -73,7 +79,14 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				break;
 			case 2: // start change detection
+				if (CChangeDetection::Running())
+				{
+					CLog::AddToLog(CString("Will not start running task."));
+				}
+				else
+				{
 				theApp.m_pChangeDetection->Start();
+				}
 				break;
 			}
 		}
