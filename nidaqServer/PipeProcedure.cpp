@@ -75,7 +75,9 @@ UINT PipeProcedure( LPVOID pParam ) {
 				char* onName = (char*) &commandBuffer.body[1];
 				char* offName = (char*) &commandBuffer.body[2+strlen(onName)];
 				TRACE("EventNames: %s %s\n", onName, offName);
-				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
+				CChangeDetection::AddLine(commandBuffer.body[0], onName, offName);
+//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
+//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
 				}
 				break;
 			case 2: // start change detection
@@ -85,7 +87,9 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				else
 				{
-				theApp.m_pChangeDetection->Start();
+					CChangeDetection::Start();
+//				theApp.m_pDevice->StartChangeDetection();
+//				theApp.m_pChangeDetection->Start();
 				}
 				break;
 			}

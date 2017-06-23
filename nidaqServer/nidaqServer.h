@@ -31,7 +31,8 @@ public:
 	DECLARE_MESSAGE_MAP()
 //private:
 public:
-	CChangeDetection* m_pChangeDetection;
+//	CChangeDetection* m_pChangeDetection;
+//	CDAQmxDevice* m_pDevice;
 };
 
 extern CnidaqServerApp theApp;

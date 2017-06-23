@@ -11,6 +11,7 @@
 #include "nidaqServerDoc.h"
 #include "nidaqServerView.h"
 #include "PipeProcedure.h"
+#include "nidaqProcedure.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -111,12 +112,14 @@ BOOL CnidaqServerApp::InitInstance()
 		return FALSE;
 
 	AfxBeginThread(PipeProcedure, NULL);
+//	AfxBeginThread(nidaqProcedure, NULL);
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOWMINIMIZED);
 	m_pMainWnd->UpdateWindow();
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
-	m_pChangeDetection = new CChangeDetection();
+	CDAQmx::Init();
+//	m_pChangeDetection = new CChangeDetection();
 
 	//m_pChangeDetection->AddLine(5, "LeverPress", "LeverRelease");
 	//m_pChangeDetection->AddLine(6, "PhotodiodeOn", "PhotodiodeOff");
@@ -128,7 +131,7 @@ BOOL CnidaqServerApp::InitInstance()
 int CnidaqServerApp::ExitInstance()
 {
 	//TODO: handle additional resources you may have added
-	delete m_pChangeDetection;
+//	delete m_pChangeDetection;
 	//delete m_pLever;
 	//delete m_pPhotodiode;
 	AfxOleTerm(FALSE);

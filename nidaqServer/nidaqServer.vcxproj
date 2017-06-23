@@ -190,6 +190,7 @@
     <ClInclude Include="DAQmx.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="nidaqProcedure.h" />
     <ClInclude Include="nidaqServer.h" />
     <ClInclude Include="nidaqServerDoc.h" />
     <ClInclude Include="nidaqServerView.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="DAQmx.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="nidaqProcedure.cpp" />
     <ClCompile Include="nidaqServer.cpp" />
     <ClCompile Include="nidaqServerDoc.cpp" />
     <ClCompile Include="nidaqServerView.cpp" />
