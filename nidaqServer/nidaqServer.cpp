@@ -11,7 +11,7 @@
 #include "nidaqServerDoc.h"
 #include "nidaqServerView.h"
 #include "PipeProcedure.h"
-#include "nidaqProcedure.h"
+//#include "nidaqProcedure.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -134,6 +134,8 @@ int CnidaqServerApp::ExitInstance()
 //	delete m_pChangeDetection;
 	//delete m_pLever;
 	//delete m_pPhotodiode;
+//	delete m_pDevice;
+	CDAQmx::Cleanup();
 	AfxOleTerm(FALSE);
 
 	return CWinApp::ExitInstance();

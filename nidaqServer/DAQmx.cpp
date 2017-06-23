@@ -3,13 +3,15 @@
 #include "nidaqServer.h"
 #include "Log.h"
 #include <strsafe.h>
+//#include "nidaqProcedure.h"
 
 #pragma comment(lib, "NIDAQmx.lib")
 
 extern CnidaqServerApp theApp;
 
 //CDAQmxDevice* CDAQmx::m_pDevice;
-CDAQmxDevice* CChangeDetection::m_pDevice;
+//CDAQmxDevice* CChangeDetection::m_pDevice;
+CDAQmxDevice* CDAQmx::m_pDevice;
 TaskHandle CChangeDetection::m_taskHandle;
 //char CChangeDetection::m_lines[136] = {0};
 char CDAQmxM_Series::m_lines[136] = {0};
@@ -45,10 +47,21 @@ static void DAQCheckStatus(void)
 	ASSERT(false);
 }
 
+
+CDAQmxDevice::~CDAQmxDevice(void)
+{
+//	delete m_pChangeDetection;
+//	DAQstatus = DAQmxClearTask(m_taskHandle);
+//	DAQCheckStatus();
+	TRACE("DAQmxDevice Destruktor\n");
+}
+
+
 CDAQmxM_Series::CDAQmxM_Series(void)
 {
 	TRACE("DAQmxM_Series Konstruktor\n");
-	m_pChangeDetection = new CChangeDetection(this);
+	m_pChangeDetection = new CChangeDetection();
+//	m_pChangeDetection = new CChangeDetection(this);
 //	DAQstatus = DAQmxCreateTask("DAQmxTask", &m_taskHandle);
 //	DAQCheckStatus();
 }
@@ -58,7 +71,7 @@ CDAQmxM_Series::~CDAQmxM_Series(void)
 	delete m_pChangeDetection;
 //	DAQstatus = DAQmxClearTask(m_taskHandle);
 //	DAQCheckStatus();
-//	TRACE("DAQmxTask Destruktor\n");
+	TRACE("DAQmxM_Series Destruktor\n");
 }
 
 void CDAQmxM_Series::AddLine(BYTE lineNumber, char* onName, char* offName)
@@ -92,11 +105,20 @@ void CDAQmxM_Series::StartChangeDetection()
 CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 {
 	TRACE("DAQmxDigitalIO Konstruktor\n");
-	m_pChangeDetection = new CChangeDetection(this);
+	m_pChangeDetection = new CChangeDetection();
+//	m_pChangeDetection = new CChangeDetection(this);
 	//DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
 	//DAQCheckStatus();
 	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, "Dev1/port0/line4:7", "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
+}
+
+CDAQmxDigitalIO::~CDAQmxDigitalIO(void)
+{
+	delete m_pChangeDetection;
+//	DAQstatus = DAQmxClearTask(m_taskHandle);
+//	DAQCheckStatus();
+	TRACE("DAQmxDigitalIO Destruktor\n");
 }
 
 //void CDAQmxDigitalIO::AddInputLine(BYTE lineNumber, char* onName, char* offName)
@@ -127,18 +149,38 @@ VOID CALLBACK CChangeDetection::TimerCallback(PTP_CALLBACK_INSTANCE instance, PV
 	m_value = value;
 }
 
+UINT CChangeDetection::nidaqProcedure( LPVOID pParam ) {
+	
+	uInt32 value = 0;
+	while (true)
+	{
+		DAQstatus = DAQmxReadDigitalScalarU32(m_taskHandle, 0.0, &value, NULL);
+		DAQCheckStatus();
+		value &= m_lineMask;
+		if (value != m_value)
+		{
+			TRACE("Change detected: %u->%u\n", m_value, value);
+			for (BYTE i=0; i<m_nLines; i++) m_pLines[i]->SignalEvent(value, value ^ m_value);
+			m_value = value;
+		}
+		Sleep(1);
+	}
+	return 0;	// pretend success
+}
+
 void CDAQmxDigitalIO::StartChangeDetection()
 {
 	TRACE("TODO: DigitalIO::StartChangeDetection\n");
-	PTP_TIMER tpTimer = CreateThreadpoolTimer((PTP_TIMER_CALLBACK) CChangeDetection::TimerCallback, NULL, NULL);
-	ASSERT(tpTimer);
-      FILETIME FileDueTime;
-      ULARGE_INTEGER ulDueTime;
-      ulDueTime.QuadPart = (ULONGLONG) -(1 * 10 * 1000 * 1000);
-      FileDueTime.dwHighDateTime = ulDueTime.HighPart;
-      FileDueTime.dwLowDateTime  = ulDueTime.LowPart;
-	SetThreadpoolTimer(tpTimer, &FileDueTime, 6, 0);
-	ASSERT(tpTimer);
+	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+	//PTP_TIMER tpTimer = CreateThreadpoolTimer((PTP_TIMER_CALLBACK) CChangeDetection::TimerCallback, NULL, NULL);
+	//ASSERT(tpTimer);
+ //     FILETIME FileDueTime;
+ //     ULARGE_INTEGER ulDueTime;
+ //     ulDueTime.QuadPart = (ULONGLONG) -(1 * 10 * 1000 * 1000);
+ //     FileDueTime.dwHighDateTime = ulDueTime.HighPart;
+ //     FileDueTime.dwLowDateTime  = ulDueTime.LowPart;
+	//SetThreadpoolTimer(tpTimer, &FileDueTime, 6, 0);
+	//ASSERT(tpTimer);
 }
 
 
@@ -167,7 +209,8 @@ void CDAQmx::Init(void)
 			UnsupportedDevice("M-Series", productType);
 		}
 //		new CDAQmxM_Series();
-		new CDAQmxDigitalIO();
+//		new CDAQmxDigitalIO();
+		m_pDevice = new CDAQmxDigitalIO();
 //		theApp.m_pDevice = new CDAQmxM_Series();
 		break;
 	case DAQmx_Val_DigitalIO:
@@ -175,8 +218,8 @@ void CDAQmx::Init(void)
 		{
 			UnsupportedDevice("Digital I/O", productType);
 		}
-		new CDAQmxDigitalIO();
-//		theApp.m_pDevice = new CDAQmxDigitalIO();
+//		new CDAQmxDigitalIO();
+		m_pDevice = new CDAQmxDigitalIO();
 		break;
 	default:
 		CString temp;
@@ -191,6 +234,13 @@ void CDAQmx::Init(void)
 }
 
 
+void CDAQmx::Cleanup(void)
+{
+	m_pDevice->~CDAQmxDevice();
+//	delete m_pDevice;
+}
+
+	
 CDAQmxTask::CDAQmxTask(void)
 {
 	TRACE("DAQmxTask Konstruktor\n");
@@ -265,23 +315,24 @@ int32 CVICALLBACK CChangeDetection::ChangeDetectionCallback(TaskHandle taskHandl
 }
 
 
-//CChangeDetection::CChangeDetection(void)
-//{
-//	DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
-//	DAQCheckStatus();
-//}
-
-
-CChangeDetection::CChangeDetection(CDAQmxDevice* pDevice)
+CChangeDetection::CChangeDetection(void)
 {
 	DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
 	DAQCheckStatus();
-	m_pDevice = pDevice;
 }
+
+
+//CChangeDetection::CChangeDetection(CDAQmxDevice* pDevice)
+//{
+//	DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
+//	DAQCheckStatus();
+//	m_pDevice = pDevice;
+//}
 
 
 CChangeDetection::~CChangeDetection(void)
 {
+	TRACE("ChangeDetection Destruktor\n");
 	DAQstatus = DAQmxStopTask(m_taskHandle);
 	DAQCheckStatus();
 	// unregister the callback
@@ -299,7 +350,7 @@ void CChangeDetection::Init(void)
 
 void CChangeDetection::Start(void)
 {
-	m_pDevice->StartChangeDetection();
+	CDAQmx::m_pDevice->StartChangeDetection();
 	//DAQstatus = DAQmxCreateDIChan(m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 	//DAQCheckStatus();
 	//DAQstatus = DAQmxReadDigitalScalarU32(m_taskHandle, 0.0, &m_value, NULL);
@@ -317,7 +368,7 @@ void CChangeDetection::Start(void)
 
 void CChangeDetection::AddLine(BYTE lineNumber, char* onName, char* offName)
 {
-	m_pDevice->AddLine(lineNumber, onName, offName);
+	CDAQmx::m_pDevice->AddLine(lineNumber, onName, offName);
 	//char lineName[17] = "Dev1/port0/lineX";
 	//lineName[15] = '0'+lineNumber;
 	//if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");

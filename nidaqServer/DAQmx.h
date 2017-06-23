@@ -32,7 +32,7 @@ public:
 	virtual void AddLine(BYTE lineNumber, char* onName, char* offName) = 0;
 	virtual void StartChangeDetection(void) = 0;
 //	CDAQmxDevice(void);
-//	~CDAQmxDevice(void);
+	virtual ~CDAQmxDevice(void) = 0;
 protected:
 	CChangeDetection* m_pChangeDetection;
 };
@@ -40,21 +40,22 @@ protected:
 class CChangeDetection
 {
 public:
-//	CChangeDetection(void);
-	CChangeDetection(CDAQmxDevice* pDevice);
+	CChangeDetection(void);
+//	CChangeDetection(CDAQmxDevice* pDevice);
 	~CChangeDetection(void);
 	static void AddLine(BYTE lineNumber, char* onName, char* offName);
 	static void Start(void);
 	static void Init(void);
 	static int32 CVICALLBACK ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData);
 	static VOID CALLBACK TimerCallback(PTP_CALLBACK_INSTANCE instance, PVOID pv, PTP_TIMER timer);
+	static UINT nidaqProcedure( LPVOID pParam );
 	static TaskHandle m_taskHandle;
 private:
 	static BYTE m_nLines;
 	static BYTE m_lineMask;
 	static uInt32 m_value;
 	static CChangeDetectionLine* m_pLines[8];
-	static CDAQmxDevice* m_pDevice;
+//	static CDAQmxDevice* m_pDevice;
 public:
 	static bool Running(void);
 };
@@ -94,7 +95,8 @@ class CDAQmx
 {
 public:
 	static void Init(void);
-//	static CDAQmxDevice* m_pDevice;
+	static void Cleanup(void);
+	static CDAQmxDevice* m_pDevice;
 };
 
 class CDAQmxTask
