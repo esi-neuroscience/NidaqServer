@@ -65,7 +65,21 @@ UINT PipeProcedure( LPVOID pParam ) {
 			//}
 			switch (commandBuffer.type)
 			{
-			case 1:	// add line to change detection
+			case 1:	// add pulse-line to change detection
+				if (CChangeDetection::Running())
+				{
+					CLog::AddToLog(CString("Will not add line to running task."));
+				}
+				else
+				{
+				char* pulseName = (char*) &commandBuffer.body[1];
+				TRACE("PulseEventName: %s\n", pulseName);
+				CChangeDetection::AddLine(commandBuffer.body[0], pulseName);
+//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
+//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
+				}
+				break;
+			case 2:	// add on/off-line to change detection
 				if (CChangeDetection::Running())
 				{
 					CLog::AddToLog(CString("Will not add line to running task."));
@@ -80,7 +94,7 @@ UINT PipeProcedure( LPVOID pParam ) {
 //				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
 				}
 				break;
-			case 2: // start change detection
+			case 3: // start change detection
 				if (CChangeDetection::Running())
 				{
 					CLog::AddToLog(CString("Will not start running task."));

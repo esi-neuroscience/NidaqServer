@@ -12,15 +12,11 @@ static void DAQCheckStatus(void);
 class CChangeDetectionLine
 {
 public:
-	CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName);
-	~CChangeDetectionLine(void);
+//	CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName);
+//	~CChangeDetectionLine(void);
 	BYTE m_lineNumber;
 	BYTE m_mask;
-	HANDLE m_onEvent;
-	HANDLE m_offEvent;
-	char* m_onName;
-	char* m_offName;
-	void SignalEvent(uInt32 value, uInt32 changedBits);
+	virtual void SignalEvent(uInt32 value, uInt32 changedBits) = 0;
 };
 
 class CChangeDetection;
@@ -29,7 +25,7 @@ class CDAQmxDevice
 {
 public:
 //	virtual void AddInputLine(BYTE lineNumber, char* onName, char* offName) = 0;
-	virtual void AddLine(BYTE lineNumber, char* onName, char* offName) = 0;
+//	virtual void AddLine(BYTE lineNumber, char* onName, char* offName) = 0;
 	virtual void StartChangeDetection(void) = 0;
 //	CDAQmxDevice(void);
 	virtual ~CDAQmxDevice(void) = 0;
@@ -43,6 +39,7 @@ public:
 	CChangeDetection(void);
 //	CChangeDetection(CDAQmxDevice* pDevice);
 	~CChangeDetection(void);
+	static void AddLine(BYTE lineNumber, char* pulseName);
 	static void AddLine(BYTE lineNumber, char* onName, char* offName);
 	static void Start(void);
 	static void Init(void);
@@ -68,7 +65,7 @@ public:
 	CDAQmxM_Series(void);
 	~CDAQmxM_Series(void);
 //	void AddInputLine(BYTE lineNumber, char* onName, char* offName) {m_pChangeDetection->AddLine(lineNumber, onName, offName);};
-	void AddLine(BYTE lineNumber, char* onName, char* offName);
+//	void AddLine(BYTE lineNumber, char* onName, char* offName);
 //	void StartChangeDetection() {m_pChangeDetection->Start();};
 	void StartChangeDetection();
 private:
@@ -82,7 +79,8 @@ public:
 	CDAQmxDigitalIO(void);
 	~CDAQmxDigitalIO(void);
 //	void AddInputLine(BYTE lineNumber, char* onName, char* offName);
-	void AddLine(BYTE lineNumber, char* onName, char* offName);
+	//void AddLine(BYTE lineNumber, char* pulseName);
+	//void AddLine(BYTE lineNumber, char* onName, char* offName);
 	void StartChangeDetection();
 private:
 	static BYTE m_nLines;
@@ -120,4 +118,28 @@ public:
 	void Start(void);
 };
 
+class CPulseDetectionLine :
+	public CChangeDetectionLine
+{
+public:
+//	CPulseDetectionLine(void);
+	CPulseDetectionLine(BYTE lineNumber, char* pulseName);
+	~CPulseDetectionLine(void);
+	void SignalEvent(uInt32 value, uInt32 changedBits);
+	HANDLE m_pulseEvent;
+	char* m_pulseName;
+};
 
+class COnOffDetectionLine :
+	public CChangeDetectionLine
+{
+public:
+//	COnOffDetectionLine(void);
+	COnOffDetectionLine(BYTE lineNumber, char* onName, char* offName);
+	~COnOffDetectionLine(void);
+	void SignalEvent(uInt32 value, uInt32 changedBits);
+	HANDLE m_onEvent;
+	HANDLE m_offEvent;
+	char* m_onName;
+	char* m_offName;
+};
