@@ -385,9 +385,9 @@ CChangeDetectionLine::CChangeDetectionLine(BYTE lineNumber, char* onName, char* 
 	size_t bufferSize;
 	TRACE("ChangeDetectionLine Konstruktor\n");
 	m_mask = (1 << lineNumber);
-	// we use manual reset events
-	VERIFY(m_onEvent = CreateEventA(NULL, FALSE, FALSE, onName));
-	VERIFY(m_offEvent = CreateEventA(NULL, FALSE, FALSE, offName));
+	// we use manual reset events (for on/off lines)
+	VERIFY(m_onEvent = CreateEventA(NULL, TRUE, FALSE, onName));
+	VERIFY(m_offEvent = CreateEventA(NULL, TRUE, FALSE, offName));
 	bufferSize = strlen(onName)+1;
 	m_onName = new char[bufferSize];
 	StringCchCopyA(m_onName, bufferSize, onName);
