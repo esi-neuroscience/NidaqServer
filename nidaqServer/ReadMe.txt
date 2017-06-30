@@ -114,3 +114,4 @@ redistributing Visual C++ applications in MSDN documentation.
 
 /////////////////////////////////////////////////////////////////////////////
 1.0.1.0	Mst	27-Jun-2017	pulse line support
+1.0.2.0 MSt 30-Jun-2017 M-Series: arbitrary line selection

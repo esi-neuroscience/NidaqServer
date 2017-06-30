@@ -460,9 +460,10 @@ void CPulseDetectionLine::SignalEvent(uInt32 value, uInt32 changedBits)
 		if (value & m_mask)
 		{
 			VERIFY(SetEvent(m_pulseEvent));
-			CString temp;
-			temp.Format(_T(" %u %u %u"), value, changedBits, m_mask);
-			CLog::AddToLog(CString(m_pulseName) + temp);
+			//CString temp;
+			//temp.Format(_T(" %u %u %u"), value, changedBits, m_mask);
+			//CLog::AddToLog(CString(m_pulseName) + temp);
+			CLog::AddToLog(CString(m_pulseName));
 		}
 	}
 }
