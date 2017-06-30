@@ -12,11 +12,9 @@ static void DAQCheckStatus(void);
 class CChangeDetectionLine
 {
 public:
-//	CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName);
-//	~CChangeDetectionLine(void);
-	BYTE m_lineNumber;
-	BYTE m_mask;
 	virtual void SignalEvent(uInt32 value, uInt32 changedBits) = 0;
+//	BYTE m_lineNumber;
+	BYTE m_mask;
 };
 
 class CChangeDetection;
@@ -25,7 +23,7 @@ class CDAQmxDevice
 {
 public:
 //	virtual void AddInputLine(BYTE lineNumber, char* onName, char* offName) = 0;
-//	virtual void AddLine(BYTE lineNumber, char* onName, char* offName) = 0;
+	virtual void AddLine(BYTE lineNumber) = 0;
 	virtual void StartChangeDetection(void) = 0;
 //	CDAQmxDevice(void);
 	virtual ~CDAQmxDevice(void) = 0;
@@ -43,6 +41,7 @@ public:
 	static void AddLine(BYTE lineNumber, char* onName, char* offName);
 	static void Start(void);
 	static void Init(void);
+	static bool Running(void);
 	static int32 CVICALLBACK ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData);
 	static VOID CALLBACK TimerCallback(PTP_CALLBACK_INSTANCE instance, PVOID pv, PTP_TIMER timer);
 	static UINT nidaqProcedure( LPVOID pParam );
@@ -53,8 +52,6 @@ private:
 	static uInt32 m_value;
 	static CChangeDetectionLine* m_pLines[8];
 //	static CDAQmxDevice* m_pDevice;
-public:
-	static bool Running(void);
 };
 
 
@@ -65,7 +62,7 @@ public:
 	CDAQmxM_Series(void);
 	~CDAQmxM_Series(void);
 //	void AddInputLine(BYTE lineNumber, char* onName, char* offName) {m_pChangeDetection->AddLine(lineNumber, onName, offName);};
-//	void AddLine(BYTE lineNumber, char* onName, char* offName);
+	void AddLine(BYTE lineNumber);
 //	void StartChangeDetection() {m_pChangeDetection->Start();};
 	void StartChangeDetection();
 private:
@@ -79,8 +76,7 @@ public:
 	CDAQmxDigitalIO(void);
 	~CDAQmxDigitalIO(void);
 //	void AddInputLine(BYTE lineNumber, char* onName, char* offName);
-	//void AddLine(BYTE lineNumber, char* pulseName);
-	//void AddLine(BYTE lineNumber, char* onName, char* offName);
+	void AddLine(BYTE lineNumber) {};
 	void StartChangeDetection();
 private:
 	static BYTE m_nLines;

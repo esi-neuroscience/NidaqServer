@@ -121,10 +121,6 @@ BOOL CnidaqServerApp::InitInstance()
 	CDAQmx::Init();
 //	m_pChangeDetection = new CChangeDetection();
 
-	//m_pChangeDetection->AddLine(5, "LeverPress", "LeverRelease");
-	//m_pChangeDetection->AddLine(6, "PhotodiodeOn", "PhotodiodeOff");
-	//m_pChangeDetection->Start();
-
 	return TRUE;
 }
 

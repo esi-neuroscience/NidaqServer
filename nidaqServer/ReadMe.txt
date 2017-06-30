@@ -113,3 +113,4 @@ For more information on both of these topics, please see the section on
 redistributing Visual C++ applications in MSDN documentation.
 
 /////////////////////////////////////////////////////////////////////////////
+1.0.1.0	Mst	27-Jun-2017	pulse line support

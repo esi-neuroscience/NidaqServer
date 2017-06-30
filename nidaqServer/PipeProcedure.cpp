@@ -72,11 +72,11 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				else
 				{
-				char* pulseName = (char*) &commandBuffer.body[1];
-				TRACE("PulseEventName: %s\n", pulseName);
-				CChangeDetection::AddLine(commandBuffer.body[0], pulseName);
-//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
-//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
+					char* pulseName = (char*) &commandBuffer.body[1];
+					TRACE("PulseEventName: %s\n", pulseName);
+					CChangeDetection::AddLine(commandBuffer.body[0], pulseName);
+					//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
+					//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
 				}
 				break;
 			case 2:	// add on/off-line to change detection
@@ -86,12 +86,12 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				else
 				{
-				char* onName = (char*) &commandBuffer.body[1];
-				char* offName = (char*) &commandBuffer.body[2+strlen(onName)];
-				TRACE("EventNames: %s %s\n", onName, offName);
-				CChangeDetection::AddLine(commandBuffer.body[0], onName, offName);
-//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
-//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
+					char* onName = (char*) &commandBuffer.body[1];
+					char* offName = (char*) &commandBuffer.body[2+strlen(onName)];
+					TRACE("EventNames: %s %s\n", onName, offName);
+					CChangeDetection::AddLine(commandBuffer.body[0], onName, offName);
+					//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
+					//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
 				}
 				break;
 			case 3: // start change detection
@@ -102,8 +102,8 @@ UINT PipeProcedure( LPVOID pParam ) {
 				else
 				{
 					CChangeDetection::Start();
-//				theApp.m_pDevice->StartChangeDetection();
-//				theApp.m_pChangeDetection->Start();
+					//				theApp.m_pDevice->StartChangeDetection();
+					//				theApp.m_pChangeDetection->Start();
 				}
 				break;
 			}
