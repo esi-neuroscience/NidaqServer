@@ -57,6 +57,9 @@
     <ClInclude Include="PipeProcedure.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="Reward.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="nidaqServer.cpp">
@@ -81,6 +84,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="PipeProcedure.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Reward.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

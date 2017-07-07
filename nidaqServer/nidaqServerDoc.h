@@ -14,6 +14,7 @@ protected: // create from serialization only
 
 // Attributes
 public:
+	short m_rewardTime;
 
 // Operations
 public:

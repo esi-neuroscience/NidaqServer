@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "PipeProcedure.h"
 #include "nidaqServer.h"
+#include "nidaqServerDoc.h"
+#include "Reward.h"
 #include "Log.h"
 
 HANDLE hPipe;
@@ -17,13 +19,13 @@ UINT PipeProcedure( LPVOID pParam ) {
 		COINIT_MULTITHREADED);
 	ASSERT(hr == S_OK);
 
-	//POSITION pos = theApp.GetFirstDocTemplatePosition();
-	//CDocTemplate* temp = theApp.GetNextDocTemplate(pos);
-	//pos = temp->GetFirstDocPosition();
-	//CStimServerDoc* pDoc = (CStimServerDoc*) temp->GetNextDoc(pos);
+	POSITION pos = theApp.GetFirstDocTemplatePosition();
+	CDocTemplate* temp = theApp.GetNextDocTemplate(pos);
+	pos = temp->GetFirstDocPosition();
+	CnidaqServerDoc* pDoc = (CnidaqServerDoc*) temp->GetNextDoc(pos);
 
 	hPipe = CreateNamedPipe(
-		_T("\\\\.\\pipe\\nidaqServerPipe"),
+		_T("\\\\.\\pipe\\NidaqServerPipe"),
 		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
 		1,			// max. number of instances
@@ -106,6 +108,29 @@ UINT PipeProcedure( LPVOID pParam ) {
 					//				theApp.m_pChangeDetection->Start();
 				}
 				break;
+			case 4: // set reward pulse duration
+				if (messageLength != 3)
+				{
+					CLog::AddToLog(CString("Command length error in set reward pulse duration."));
+				}
+				else
+				{
+					pDoc->m_rewardTime = *((short*) &commandBuffer.body[0]);
+				}
+				break;
+			case 5: // start reward sequence
+				// if messageLength is even, it's caught in the error check to follow
+				// nParams is invalid in this case
+				BYTE nParams = (messageLength-1) / 2;
+				if (EVEN(messageLength) || EVEN(nParams))
+				{
+					CLog::AddToLog(CString("Command length error in start reward sequence."));
+				}
+				else
+				{
+					CReward::StartSequence(nParams, (short*) &commandBuffer.body[0]);
+				}
+				break;
 			}
 		}
 		VERIFY(DisconnectNamedPipe(hPipe));	// neccessary for re-connect
@@ -116,10 +141,10 @@ UINT PipeProcedure( LPVOID pParam ) {
 	return 0;	// pretend success
 }
 
-void WritePipe(void* buffer, unsigned char bytesToWrite)
-{
-	DWORD bytesWritten;
-
-	VERIFY(WriteFile(hPipe, buffer, bytesToWrite, &bytesWritten, NULL));
-	ASSERT(bytesWritten == bytesToWrite);
-}
+//void WritePipe(void* buffer, unsigned char bytesToWrite)
+//{
+//	DWORD bytesWritten;
+//
+//	VERIFY(WriteFile(hPipe, buffer, bytesToWrite, &bytesWritten, NULL));
+//	ASSERT(bytesWritten == bytesToWrite);
+//}

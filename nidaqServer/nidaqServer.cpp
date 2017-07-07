@@ -12,6 +12,8 @@
 #include "nidaqServerView.h"
 #include "PipeProcedure.h"
 //#include "nidaqProcedure.h"
+//#include "RewardEventProcedure.h"
+#include "Reward.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -111,7 +113,7 @@ BOOL CnidaqServerApp::InitInstance()
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 
-	AfxBeginThread(PipeProcedure, NULL);
+	VERIFY(AfxBeginThread(PipeProcedure, NULL));
 //	AfxBeginThread(nidaqProcedure, NULL);
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOWMINIMIZED);
@@ -119,6 +121,7 @@ BOOL CnidaqServerApp::InitInstance()
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
 	CDAQmx::Init();
+	CReward::Init();
 //	m_pChangeDetection = new CChangeDetection();
 
 	return TRUE;
@@ -131,6 +134,7 @@ int CnidaqServerApp::ExitInstance()
 	//delete m_pLever;
 	//delete m_pPhotodiode;
 //	delete m_pDevice;
+	CReward::Cleanup();
 	CDAQmx::Cleanup();
 	AfxOleTerm(FALSE);
 

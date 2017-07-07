@@ -28,6 +28,7 @@ END_MESSAGE_MAP()
 // CnidaqServerDoc construction/destruction
 
 CnidaqServerDoc::CnidaqServerDoc()
+	: m_rewardTime(100)
 {
 	// TODO: add one-time construction code here
 

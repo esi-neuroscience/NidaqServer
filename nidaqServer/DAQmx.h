@@ -6,8 +6,8 @@
 //const BYTE LEVER_LINE = 5;
 //const BYTE PHOTODIODE_LINE = 6;
 
-static int32 DAQstatus;
-static void DAQCheckStatus(void);
+//static int32 DAQstatus;
+//static void DAQCheckStatus(void);
 
 class CChangeDetectionLine
 {

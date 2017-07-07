@@ -7,7 +7,9 @@
 
 #pragma comment(lib, "NIDAQmx.lib")
 
-extern CnidaqServerApp theApp;
+int32 DAQstatus;
+
+// extern CnidaqServerApp theApp;
 
 //CDAQmxDevice* CDAQmx::m_pDevice;
 //CDAQmxDevice* CChangeDetection::m_pDevice;
@@ -23,7 +25,7 @@ BYTE CDAQmxDigitalIO::m_nLines = 0;
 BYTE CDAQmxDigitalIO::m_lineMask = 0;
 CChangeDetectionLine* CDAQmxDigitalIO::m_pLines[4];
 
-static void DAQCheckStatus(void)
+void DAQCheckStatus(void)
 {
 	if (DAQstatus == 0) return;
 	CString errMsg;
