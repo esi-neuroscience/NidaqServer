@@ -63,16 +63,11 @@ CDAQmxM_Series::CDAQmxM_Series(void)
 {
 	TRACE("DAQmxM_Series Konstruktor\n");
 	m_pChangeDetection = new CChangeDetection();
-//	m_pChangeDetection = new CChangeDetection(this);
-//	DAQstatus = DAQmxCreateTask("DAQmxTask", &m_taskHandle);
-//	DAQCheckStatus();
 }
 
 CDAQmxM_Series::~CDAQmxM_Series(void)
 {
 	delete m_pChangeDetection;
-//	DAQstatus = DAQmxClearTask(m_taskHandle);
-//	DAQCheckStatus();
 	TRACE("DAQmxM_Series Destruktor\n");
 }
 
@@ -107,9 +102,6 @@ CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 {
 	TRACE("DAQmxDigitalIO Konstruktor\n");
 	m_pChangeDetection = new CChangeDetection();
-//	m_pChangeDetection = new CChangeDetection(this);
-	//DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
-	//DAQCheckStatus();
 	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, "Dev1/port2/line4:7", "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
 }
@@ -117,8 +109,6 @@ CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 CDAQmxDigitalIO::~CDAQmxDigitalIO(void)
 {
 	delete m_pChangeDetection;
-//	DAQstatus = DAQmxClearTask(m_taskHandle);
-//	DAQCheckStatus();
 	TRACE("DAQmxDigitalIO Destruktor\n");
 }
 
@@ -209,9 +199,6 @@ void CDAQmx::Init(void)
 		{
 			UnsupportedDevice("M-Series", productType);
 		}
-//		new CDAQmxM_Series();
-//		new CDAQmxDigitalIO();
-//		m_pDevice = new CDAQmxDigitalIO();
 		m_pDevice = new CDAQmxM_Series();
 		break;
 	case DAQmx_Val_DigitalIO:
@@ -219,7 +206,6 @@ void CDAQmx::Init(void)
 		{
 			UnsupportedDevice("Digital I/O", productType);
 		}
-//		new CDAQmxDigitalIO();
 		m_pDevice = new CDAQmxDigitalIO();
 		break;
 	default:
@@ -228,10 +214,6 @@ void CDAQmx::Init(void)
 		CLog::AddToLog(temp);
 		break;
 	}
-	//bool32 changeDetectSupported;
-	//DAQstatus = DAQmxGetPhysicalChanDIChangeDetectSupported("Dev2/port0", &changeDetectSupported);
-	//DAQCheckStatus();
-	//TRACE("Change Detection Supported: %d\n", changeDetectSupported);
 }
 
 
@@ -245,16 +227,12 @@ void CDAQmx::Cleanup(void)
 CDAQmxTask::CDAQmxTask(void)
 {
 	TRACE("DAQmxTask Konstruktor\n");
-//	DAQstatus = DAQmxCreateTask("DAQmxTask", &m_taskHandle);
-//	DAQCheckStatus();
 }
 
 
 CDAQmxTask::~CDAQmxTask(void)
 {
-//	DAQstatus = DAQmxClearTask(m_taskHandle);
-//	DAQCheckStatus();
-//	TRACE("DAQmxTask Destruktor\n");
+	TRACE("DAQmxTask Destruktor\n");
 }
 
 
