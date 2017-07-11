@@ -119,16 +119,29 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				break;
 			case 5: // start reward sequence
-				// if messageLength is even, it's caught in the error check to follow
-				// nParams is invalid in this case
-				BYTE nParams = (messageLength-1) / 2;
-				if (EVEN(messageLength) || EVEN(nParams))
 				{
-					CLog::AddToLog(CString("Command length error in start reward sequence."));
+					// if messageLength is even, it's caught in the error check to follow
+					// nParams is invalid in this case
+					BYTE nParams = (messageLength-1) / 2;
+					if (EVEN(messageLength) || EVEN(nParams))
+					{
+						CLog::AddToLog(CString("Command length error in start reward sequence."));
+					}
+					else
+					{
+						CReward::StartSequence(nParams, (short*) &commandBuffer.body[0]);
+					}
+				}
+				break;
+			case 6: // write event marker
+				ASSERT(messageLength == 3);
+				if (messageLength != 3)
+				{
+					CLog::AddToLog(CString("Command length error in write event marker."));
 				}
 				else
 				{
-					CReward::StartSequence(nParams, (short*) &commandBuffer.body[0]);
+					CDAQmx::WriteEventMarker((short*) &commandBuffer.body[0]);
 				}
 				break;
 			}

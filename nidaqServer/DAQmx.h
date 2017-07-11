@@ -90,7 +90,11 @@ class CDAQmx
 public:
 	static void Init(void);
 	static void Cleanup(void);
+	static void WriteEventMarker(short*);
 	static CDAQmxDevice* m_pDevice;
+private:
+	static TaskHandle m_eventMarkerTask;
+	static TaskHandle m_eventMarkerStrobeTask;
 };
 
 class CDAQmxTask

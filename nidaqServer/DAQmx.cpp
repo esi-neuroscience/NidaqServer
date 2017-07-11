@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "DAQmx.h"
 #include "nidaqServer.h"
+#include "Reward.h"
 #include "Log.h"
 #include <strsafe.h>
 //#include "nidaqProcedure.h"
@@ -14,6 +15,8 @@ int32 DAQstatus;
 //CDAQmxDevice* CDAQmx::m_pDevice;
 //CDAQmxDevice* CChangeDetection::m_pDevice;
 CDAQmxDevice* CDAQmx::m_pDevice;
+TaskHandle CDAQmx::m_eventMarkerTask;
+TaskHandle CDAQmx::m_eventMarkerStrobeTask;
 TaskHandle CChangeDetection::m_taskHandle;
 //char CChangeDetection::m_lines[136] = {0};
 char CDAQmxM_Series::m_lines[136] = {0};
@@ -192,6 +195,7 @@ void CDAQmx::Init(void)
 	DAQstatus = DAQmxGetDevProductCategory("Dev1", &data);
 	DAQCheckStatus();
 	TRACE("Product Category: %d\n", data);
+	char strobeLine[17] = "Dev1/port2/line7";
 	switch (data)
 	{
 	case DAQmx_Val_MSeriesDAQ:
@@ -207,6 +211,7 @@ void CDAQmx::Init(void)
 			UnsupportedDevice("Digital I/O", productType);
 		}
 		m_pDevice = new CDAQmxDigitalIO();
+		strobeLine[15] = '1';
 		break;
 	default:
 		CString temp;
@@ -214,11 +219,44 @@ void CDAQmx::Init(void)
 		CLog::AddToLog(temp);
 		break;
 	}
+	DAQstatus = DAQmxCreateTask("EventMarkerTask", &m_eventMarkerTask);
+	DAQCheckStatus();
+	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev1/port1:0", "eventMarkerChannel", DAQmx_Val_ChanForAllLines);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStartTask(m_eventMarkerTask);
+	DAQCheckStatus();
+	DAQstatus = DAQmxCreateTask("EventMarkerStrobeTask", &m_eventMarkerStrobeTask);
+	DAQCheckStatus();
+	DAQstatus = DAQmxCreateDOChan(m_eventMarkerStrobeTask, strobeLine, "eventMarkerStrobeChannel", DAQmx_Val_ChanForAllLines);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStartTask(m_eventMarkerStrobeTask);
+	DAQCheckStatus();
+	CReward::Init();
+}
+
+void CDAQmx::WriteEventMarker(short* pMarker)
+{
+	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
+	DAQCheckStatus();
+	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 255, NULL);
+	DAQCheckStatus();
+	Sleep(1);
+	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 0, NULL);
+	DAQCheckStatus();
 }
 
 
 void CDAQmx::Cleanup(void)
 {
+	DAQstatus = DAQmxStopTask(m_eventMarkerTask);
+	DAQCheckStatus();
+	DAQstatus = DAQmxClearTask(m_eventMarkerTask);
+	DAQCheckStatus();
+	DAQstatus = DAQmxStopTask(m_eventMarkerStrobeTask);
+	DAQCheckStatus();
+	DAQstatus = DAQmxClearTask(m_eventMarkerStrobeTask);
+	DAQCheckStatus();
+	CReward::Cleanup();
 	m_pDevice->~CDAQmxDevice();
 //	delete m_pDevice;
 }
