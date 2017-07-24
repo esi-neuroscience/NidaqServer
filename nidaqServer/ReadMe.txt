@@ -118,5 +118,7 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.3.0 MSt  3-Jul-2017 reward support
 1.0.4.0 MSt  7-Jul-2017 RewardDone event; reward cleanup
 1.0.5.0 MSt 11-Jul-2017 event marker support
+1.0.5.1 MSt 11-Jul-2017 strobe is line0 (not 1) on 6503
+
 
 

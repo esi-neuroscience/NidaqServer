@@ -211,7 +211,7 @@ void CDAQmx::Init(void)
 			UnsupportedDevice("Digital I/O", productType);
 		}
 		m_pDevice = new CDAQmxDigitalIO();
-		strobeLine[15] = '1';
+		strobeLine[15] = '0';
 		break;
 	default:
 		CString temp;
