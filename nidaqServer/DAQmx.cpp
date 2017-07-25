@@ -12,21 +12,15 @@ int32 DAQstatus;
 
 // extern CnidaqServerApp theApp;
 
-//CDAQmxDevice* CDAQmx::m_pDevice;
-//CDAQmxDevice* CChangeDetection::m_pDevice;
 CDAQmxDevice* CDAQmx::m_pDevice;
 TaskHandle CDAQmx::m_eventMarkerTask;
 TaskHandle CDAQmx::m_eventMarkerStrobeTask;
 TaskHandle CChangeDetection::m_taskHandle;
-//char CChangeDetection::m_lines[136] = {0};
 char CDAQmxM_Series::m_lines[136] = {0};
 BYTE CChangeDetection::m_nLines = 0;
 BYTE CChangeDetection::m_lineMask = 0;
 uInt32 CChangeDetection::m_value;
 CChangeDetectionLine* CChangeDetection::m_pLines[8];
-BYTE CDAQmxDigitalIO::m_nLines = 0;
-BYTE CDAQmxDigitalIO::m_lineMask = 0;
-CChangeDetectionLine* CDAQmxDigitalIO::m_pLines[4];
 
 void DAQCheckStatus(void)
 {
@@ -115,33 +109,6 @@ CDAQmxDigitalIO::~CDAQmxDigitalIO(void)
 	TRACE("DAQmxDigitalIO Destruktor\n");
 }
 
-//void CDAQmxDigitalIO::AddInputLine(BYTE lineNumber, char* onName, char* offName)
-//{
-//	m_pLines[m_nLines] = new CChangeDetectionLine(lineNumber, onName, offName);
-//	m_lineMask |= m_pLines[m_nLines++]->m_mask;
-//	TRACE("Maske: %u\n", m_lineMask);
-//}
-
-//void CDAQmxDigitalIO::AddLine(BYTE lineNumber, char* onName, char* offName)
-//{
-//	TRACE("TODO: DigitalIO::AddLine\n");
-//}
-
-//TP_CALLBACK_INSTANCE* instance;
-//TP_TIMER* timer;
-//
-//VOID CALLBACK CChangeDetection::TimerCallback(PTP_CALLBACK_INSTANCE instance, PVOID pv, PTP_TIMER timer)
-//{
-////	TRACE("Timer Callback\n");
-//	uInt32 value = 0;
-//	DAQstatus = DAQmxReadDigitalScalarU32(m_taskHandle, 0.0, &value, NULL);
-//	DAQCheckStatus();
-//	value &= m_lineMask;
-//	if (value == m_value) return;
-//	TRACE("Change detected: %u->%u\n", m_value, value);
-//	for (BYTE i=0; i<m_nLines; i++) m_pLines[i]->SignalEvent(value, value ^ m_value);
-//	m_value = value;
-//}
 
 UINT CChangeDetection::nidaqProcedure( LPVOID pParam ) {
 	
@@ -166,15 +133,6 @@ void CDAQmxDigitalIO::StartChangeDetection()
 {
 	TRACE("DigitalIO::StartChangeDetection\n");
 	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
-	//PTP_TIMER tpTimer = CreateThreadpoolTimer((PTP_TIMER_CALLBACK) CChangeDetection::TimerCallback, NULL, NULL);
-	//ASSERT(tpTimer);
- //     FILETIME FileDueTime;
- //     ULARGE_INTEGER ulDueTime;
- //     ulDueTime.QuadPart = (ULONGLONG) -(1 * 10 * 1000 * 1000);
- //     FileDueTime.dwHighDateTime = ulDueTime.HighPart;
- //     FileDueTime.dwLowDateTime  = ulDueTime.LowPart;
-	//SetThreadpoolTimer(tpTimer, &FileDueTime, 6, 0);
-	//ASSERT(tpTimer);
 }
 
 
@@ -338,15 +296,6 @@ CChangeDetection::CChangeDetection(void)
 	DAQCheckStatus();
 }
 
-
-//CChangeDetection::CChangeDetection(CDAQmxDevice* pDevice)
-//{
-//	DAQstatus = DAQmxCreateTask("ChangeDetectionTask", &m_taskHandle);
-//	DAQCheckStatus();
-//	m_pDevice = pDevice;
-//}
-
-
 CChangeDetection::~CChangeDetection(void)
 {
 	TRACE("ChangeDetection Destruktor\n");
@@ -374,70 +323,32 @@ void CChangeDetection::Start(void)
 
 
 
-void CChangeDetection::AddLine(BYTE lineNumber, char* pulseName)
+void CChangeDetection::UpdateLines(BYTE lineNumber)
 {
 	CDAQmx::m_pDevice->AddLine(lineNumber);
-	m_pLines[m_nLines] = new CPulseDetectionLine(lineNumber, pulseName);
 	m_lineMask |= m_pLines[m_nLines++]->m_mask;
 	TRACE("Maske: %u\n", m_lineMask);
+}
+
+
+void CChangeDetection::AddLine(BYTE lineNumber, char* pulseName)
+{
+//	CDAQmx::m_pDevice->AddLine(lineNumber);
+	m_pLines[m_nLines] = new CPulseDetectionLine(lineNumber, pulseName);
+//	m_lineMask |= m_pLines[m_nLines++]->m_mask;
+//	TRACE("Maske: %u\n", m_lineMask);
+	UpdateLines(lineNumber);
 }
 
 
 void CChangeDetection::AddLine(BYTE lineNumber, char* onName, char* offName)
 {
-	CDAQmx::m_pDevice->AddLine(lineNumber);
+//	CDAQmx::m_pDevice->AddLine(lineNumber);
 	m_pLines[m_nLines] = new COnOffDetectionLine(lineNumber, onName, offName);
-	m_lineMask |= m_pLines[m_nLines++]->m_mask;
-	TRACE("Maske: %u\n", m_lineMask);
+//	m_lineMask |= m_pLines[m_nLines++]->m_mask;
+//	TRACE("Maske: %u\n", m_lineMask);
+	UpdateLines(lineNumber);
 }
-
-
-//CChangeDetectionLine::CChangeDetectionLine(BYTE lineNumber, char* onName, char* offName)
-//{
-//	size_t bufferSize;
-//	TRACE("ChangeDetectionLine Konstruktor\n");
-//	m_mask = (1 << lineNumber);
-//	// we use manual reset events (for on/off lines)
-//	VERIFY(m_onEvent = CreateEventA(NULL, TRUE, FALSE, onName));
-//	VERIFY(m_offEvent = CreateEventA(NULL, TRUE, FALSE, offName));
-//	bufferSize = strlen(onName)+1;
-//	m_onName = new char[bufferSize];
-//	StringCchCopyA(m_onName, bufferSize, onName);
-//	bufferSize = strlen(offName)+1;
-//	m_offName = new char[strlen(offName)+1];
-//	StringCchCopyA(m_offName, bufferSize, offName);
-//	//m_onName = onName;
-//	//m_offName = offName;
-//}
-
-//CChangeDetectionLine::~CChangeDetectionLine(void)
-//{
-//	TRACE("ChangeDetectionLine Destruktor\n");
-//	VERIFY(CloseHandle(m_onEvent));
-//	VERIFY(CloseHandle(m_offEvent));
-//	delete m_onName;
-//	delete m_offName;
-//}
-
-//void CChangeDetectionLine::SignalEvent(uInt32 value, uInt32 changedBits)
-//{
-//	if (m_mask & changedBits)
-//	{
-//		if (value & m_mask)
-//		{
-//			VERIFY(ResetEvent(m_offEvent));
-//			VERIFY(SetEvent(m_onEvent));
-//			CLog::AddToLog(CString(m_onName));
-//		}
-//		else
-//		{
-//			VERIFY(ResetEvent(m_onEvent));
-//			VERIFY(SetEvent(m_offEvent));
-//			CLog::AddToLog(CString(m_offName));
-//		}
-//	}
-//}
-
 
 bool CChangeDetection::Running(void)
 {

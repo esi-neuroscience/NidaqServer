@@ -17,26 +17,12 @@ public:
 	BYTE m_mask;
 };
 
-class CChangeDetection;
-
-class CDAQmxDevice
-{
-public:
-//	virtual void AddInputLine(BYTE lineNumber, char* onName, char* offName) = 0;
-	virtual void AddLine(BYTE lineNumber) = 0;
-	virtual void StartChangeDetection(void) = 0;
-//	CDAQmxDevice(void);
-	virtual ~CDAQmxDevice(void) = 0;
-protected:
-	CChangeDetection* m_pChangeDetection;
-};
-
 class CChangeDetection
 {
 public:
 	CChangeDetection(void);
-//	CChangeDetection(CDAQmxDevice* pDevice);
 	~CChangeDetection(void);
+	static void UpdateLines(BYTE lineNumber);
 	static void AddLine(BYTE lineNumber, char* pulseName);
 	static void AddLine(BYTE lineNumber, char* onName, char* offName);
 	static void Start(void);
@@ -51,9 +37,19 @@ private:
 	static BYTE m_lineMask;
 	static uInt32 m_value;
 	static CChangeDetectionLine* m_pLines[8];
-//	static CDAQmxDevice* m_pDevice;
 };
 
+
+class CDAQmxDevice
+{
+public:
+	virtual void AddLine(BYTE lineNumber) = 0;
+	virtual void StartChangeDetection(void) = 0;
+//	CDAQmxDevice(void);
+	virtual ~CDAQmxDevice(void) = 0;
+protected:
+	CChangeDetection* m_pChangeDetection;
+};
 
 class CDAQmxM_Series :
 	virtual public CDAQmxDevice
@@ -61,7 +57,6 @@ class CDAQmxM_Series :
 public:
 	CDAQmxM_Series(void);
 	~CDAQmxM_Series(void);
-//	void AddInputLine(BYTE lineNumber, char* onName, char* offName) {m_pChangeDetection->AddLine(lineNumber, onName, offName);};
 	void AddLine(BYTE lineNumber);
 //	void StartChangeDetection() {m_pChangeDetection->Start();};
 	void StartChangeDetection();
@@ -75,14 +70,8 @@ class CDAQmxDigitalIO :
 public:
 	CDAQmxDigitalIO(void);
 	~CDAQmxDigitalIO(void);
-//	void AddInputLine(BYTE lineNumber, char* onName, char* offName);
 	void AddLine(BYTE lineNumber) {};
 	void StartChangeDetection();
-private:
-	static BYTE m_nLines;
-	static BYTE m_lineMask;
-//	static uInt32 m_value;
-	static CChangeDetectionLine* m_pLines[4];
 };
 
 class CDAQmx

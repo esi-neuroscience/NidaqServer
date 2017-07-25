@@ -58,13 +58,6 @@ UINT PipeProcedure( LPVOID pParam ) {
 			}
 			if (error == ERROR_BROKEN_PIPE) break;
 			ASSERT(error == 0);
-//			TRACE("Message received. Length:%u; Key: %u\n", messageLength, commandBuffer.key);
-			//key = pDoc->Command(commandBuffer.key, &commandBuffer.body[0], messageLength-2);
-			//if (key != -1) {
-			//	DWORD bytesWritten;
-			//	VERIFY(WriteFile(hPipe, &key, 2, &bytesWritten, NULL));
-			//	ASSERT(bytesWritten == 2);
-			//}
 			switch (commandBuffer.type)
 			{
 			case 1:	// add pulse-line to change detection
@@ -77,8 +70,6 @@ UINT PipeProcedure( LPVOID pParam ) {
 					char* pulseName = (char*) &commandBuffer.body[1];
 					TRACE("PulseEventName: %s\n", pulseName);
 					CChangeDetection::AddLine(commandBuffer.body[0], pulseName);
-					//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
-					//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
 				}
 				break;
 			case 2:	// add on/off-line to change detection
@@ -92,8 +83,6 @@ UINT PipeProcedure( LPVOID pParam ) {
 					char* offName = (char*) &commandBuffer.body[2+strlen(onName)];
 					TRACE("EventNames: %s %s\n", onName, offName);
 					CChangeDetection::AddLine(commandBuffer.body[0], onName, offName);
-					//				theApp.m_pDevice->AddInputLine(commandBuffer.body[0], onName, offName);
-					//				theApp.m_pChangeDetection->AddLine(commandBuffer.body[0], onName, offName);
 				}
 				break;
 			case 3: // start change detection
@@ -104,8 +93,6 @@ UINT PipeProcedure( LPVOID pParam ) {
 				else
 				{
 					CChangeDetection::Start();
-					//				theApp.m_pDevice->StartChangeDetection();
-					//				theApp.m_pChangeDetection->Start();
 				}
 				break;
 			case 4: // set reward pulse duration
