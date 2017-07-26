@@ -42,10 +42,18 @@ void DAQCheckStatus(void)
 	status = DAQmxGetExtendedErrorInfo(msg, msgSize);
 	ASSERT(status == 0);
 	TRACE("%s\n", msg);
+	CLog::AddToLog(CString(msg));
 	delete msg;
 	ASSERT(false);
 }
 
+
+void CDAQmxDevice::StartChangeDetection()
+{
+	m_pChangeDetection->Init();
+	TRACE("Device::StartChangeDetection\n");
+	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+}
 
 CDAQmxDevice::~CDAQmxDevice(void)
 {
@@ -68,22 +76,42 @@ CDAQmxM_Series::~CDAQmxM_Series(void)
 	TRACE("DAQmxM_Series Destruktor\n");
 }
 
+bool CDAQmxM_Series::IsChangeDetectionLineValid(BYTE lineNumber)
+{
+	bool result = (lineNumber != 3) && (lineNumber != 7);
+	if (!result)
+	{
+		CString temp;
+		temp.Format(_T("port2/line%u is used as the %s output signal."), lineNumber, lineNumber == 3 ? _T("reward") : _T("event marker strobe"));
+		CLog::AddToLog(temp);
+		temp.Format(_T(" It will not be added as an input line."));
+		CLog::AddToLog(temp);
+	}
+	return result;
+}
+
+CString CDAQmxM_Series::ValidChangeDetectionLines(void)
+{
+	return CString(_T("0-2 and 4-6"));
+}
+
 void CDAQmxM_Series::AddLine(BYTE lineNumber)
 {
-	char lineName[17] = "Dev1/port2/lineX";
-	lineName[15] = '0'+lineNumber;
-	if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");
-	StringCbCatA(m_lines, 136, lineName);
-	TRACE("Channel: %s\n", m_lines);
+		char lineName[17] = "Dev1/port2/lineX";
+		lineName[15] = '0'+lineNumber;
+		if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");
+		StringCbCatA(m_lines, 136, lineName);
+		TRACE("Channel: %s\n", m_lines);
 }
 
 void CDAQmxM_Series::StartChangeDetection()
 {
 	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
-	m_pChangeDetection->Init();
+//	m_pChangeDetection->Init();
 	TRACE("m_Series::StartChangeDetection\n");
-	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+//	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+	CDAQmxDevice::StartChangeDetection();
 	//DAQstatus = DAQmxReadDigitalScalarU32(m_pChangeDetection->m_taskHandle, 0.0, &m_value, NULL);
 	//DAQCheckStatus();
 	//m_value &= m_lineMask;
@@ -99,7 +127,8 @@ CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 {
 	TRACE("DAQmxDigitalIO Konstruktor\n");
 	m_pChangeDetection = new CChangeDetection();
-	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, "Dev1/port2/line4:7", "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+//	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, "Dev1/port2/line4:7", "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, IOINPUTLINES , "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
 }
 
@@ -107,6 +136,25 @@ CDAQmxDigitalIO::~CDAQmxDigitalIO(void)
 {
 	delete m_pChangeDetection;
 	TRACE("DAQmxDigitalIO Destruktor\n");
+}
+
+bool CDAQmxDigitalIO::IsChangeDetectionLineValid(BYTE lineNumber)
+{
+	bool result = lineNumber > 3;
+	if (!result)
+	{
+		CString temp;
+		temp.Format(_T("port2/line%u is configured as an output signal."), lineNumber);
+		CLog::AddToLog(temp);
+		temp.Format(_T(" It will not be added as an input line."));
+		CLog::AddToLog(temp);
+	}
+	return result;
+}
+
+CString CDAQmxDigitalIO::ValidChangeDetectionLines(void)
+{
+	return CString(_T("4-7"));
 }
 
 
@@ -129,12 +177,12 @@ UINT CChangeDetection::nidaqProcedure( LPVOID pParam ) {
 	return 0;	// pretend success
 }
 
-void CDAQmxDigitalIO::StartChangeDetection()
-{
-	TRACE("DigitalIO::StartChangeDetection\n");
-	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
-}
-
+//void CDAQmxDigitalIO::StartChangeDetection()
+//{
+//	TRACE("DigitalIO::StartChangeDetection\n");
+//	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+//}
+//
 
 void UnsupportedDevice(char* category, char* type)
 {
@@ -146,11 +194,11 @@ void UnsupportedDevice(char* category, char* type)
 void CDAQmx::Init(void)
 {
 	char productType[16];
-	DAQstatus = DAQmxGetDevProductType("Dev1", &productType[0], 16);
+	DAQstatus = DAQmxGetDevProductType(DEVICE, &productType[0], 16);
 	DAQCheckStatus();
 	TRACE("Product Type: %s\n", productType);
 	int32 data;
-	DAQstatus = DAQmxGetDevProductCategory("Dev1", &data);
+	DAQstatus = DAQmxGetDevProductCategory(DEVICE, &data);
 	DAQCheckStatus();
 	TRACE("Product Category: %d\n", data);
 	char strobeLine[17] = "Dev1/port2/line7";
@@ -190,6 +238,20 @@ void CDAQmx::Init(void)
 	DAQstatus = DAQmxStartTask(m_eventMarkerStrobeTask);
 	DAQCheckStatus();
 	CReward::Init();
+}
+
+bool CDAQmx::IsChangeDetectionLineValid(BYTE lineNumber)
+{
+	if (lineNumber > 7)
+	{
+		CString temp;
+		temp.Format(_T("Config error: line %u is not a valid input line."), lineNumber);
+		CLog::AddToLog(temp);
+		temp.Format(_T(" Valid line numbers are %s."), m_pDevice->ValidChangeDetectionLines());
+		CLog::AddToLog(temp);
+		return false;
+	}
+	return m_pDevice->IsChangeDetectionLineValid(lineNumber);
 }
 
 void CDAQmx::WriteEventMarker(short* pMarker)
@@ -278,17 +340,17 @@ void CESI_Reward::Start(void)
 
 
 
-int32 CVICALLBACK CChangeDetection::ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData)
-{
-	uInt32 value = 0;
-	DAQstatus = DAQmxReadDigitalScalarU32(taskHandle, 0.0, &value, NULL);
-	DAQCheckStatus();
-	value &= m_lineMask;
-	for (BYTE i=0; i<m_nLines; i++) m_pLines[i]->SignalEvent(value, value ^ m_value);
-	m_value = value;
-	return 0;
-}
-
+//int32 CVICALLBACK CChangeDetection::ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData)
+//{
+//	uInt32 value = 0;
+//	DAQstatus = DAQmxReadDigitalScalarU32(taskHandle, 0.0, &value, NULL);
+//	DAQCheckStatus();
+//	value &= m_lineMask;
+//	for (BYTE i=0; i<m_nLines; i++) m_pLines[i]->SignalEvent(value, value ^ m_value);
+//	m_value = value;
+//	return 0;
+//}
+//
 
 CChangeDetection::CChangeDetection(void)
 {
@@ -322,7 +384,6 @@ void CChangeDetection::Start(void)
 }
 
 
-
 void CChangeDetection::UpdateLines(BYTE lineNumber)
 {
 	CDAQmx::m_pDevice->AddLine(lineNumber);
@@ -333,20 +394,14 @@ void CChangeDetection::UpdateLines(BYTE lineNumber)
 
 void CChangeDetection::AddLine(BYTE lineNumber, char* pulseName)
 {
-//	CDAQmx::m_pDevice->AddLine(lineNumber);
 	m_pLines[m_nLines] = new CPulseDetectionLine(lineNumber, pulseName);
-//	m_lineMask |= m_pLines[m_nLines++]->m_mask;
-//	TRACE("Maske: %u\n", m_lineMask);
 	UpdateLines(lineNumber);
 }
 
 
 void CChangeDetection::AddLine(BYTE lineNumber, char* onName, char* offName)
 {
-//	CDAQmx::m_pDevice->AddLine(lineNumber);
 	m_pLines[m_nLines] = new COnOffDetectionLine(lineNumber, onName, offName);
-//	m_lineMask |= m_pLines[m_nLines++]->m_mask;
-//	TRACE("Maske: %u\n", m_lineMask);
 	UpdateLines(lineNumber);
 }
 

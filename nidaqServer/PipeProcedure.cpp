@@ -7,6 +7,17 @@
 
 HANDLE hPipe;
 
+bool IsAddChangeDetectionLineValid(BYTE lineNumber)
+{
+	if (CChangeDetection::Running())
+	{
+		CLog::AddToLog(CString("Will not add line to running task."));
+		return false;
+	}
+	return CDAQmx::IsChangeDetectionLineValid(lineNumber);
+}
+
+
 UINT PipeProcedure( LPVOID pParam ) {
 	
 	extern CnidaqServerApp theApp;
@@ -61,11 +72,7 @@ UINT PipeProcedure( LPVOID pParam ) {
 			switch (commandBuffer.type)
 			{
 			case 1:	// add pulse-line to change detection
-				if (CChangeDetection::Running())
-				{
-					CLog::AddToLog(CString("Will not add line to running task."));
-				}
-				else
+				if (IsAddChangeDetectionLineValid(commandBuffer.body[0]))
 				{
 					char* pulseName = (char*) &commandBuffer.body[1];
 					TRACE("PulseEventName: %s\n", pulseName);
@@ -73,11 +80,7 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				break;
 			case 2:	// add on/off-line to change detection
-				if (CChangeDetection::Running())
-				{
-					CLog::AddToLog(CString("Will not add line to running task."));
-				}
-				else
+				if (IsAddChangeDetectionLineValid(commandBuffer.body[0]))
 				{
 					char* onName = (char*) &commandBuffer.body[1];
 					char* offName = (char*) &commandBuffer.body[2+strlen(onName)];

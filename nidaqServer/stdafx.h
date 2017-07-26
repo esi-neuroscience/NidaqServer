@@ -5,6 +5,16 @@
 
 #pragma once
 
+#define DEV2
+
+#ifdef DEV2
+#define DEVICE "Dev2"
+#define IOINPUTLINES "Dev2/port2/line4:7"
+#else
+#define DEVICE "Dev1"
+#define IOINPUTLINES "Dev1/port2/line4:7"
+#endif
+
 #ifndef _SECURE_ATL
 #define _SECURE_ATL 1
 #endif
