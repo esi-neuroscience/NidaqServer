@@ -12,8 +12,9 @@
 class CChangeDetectionLine
 {
 public:
+	CChangeDetectionLine(void) {};
+	virtual ~CChangeDetectionLine(void) {};
 	virtual void SignalEvent(uInt32 value, uInt32 changedBits) = 0;
-//	BYTE m_lineNumber;
 	BYTE m_mask;
 };
 
@@ -28,8 +29,8 @@ public:
 	static void Start(void);
 	static void Init(void);
 	static bool Running(void);
-	static int32 CVICALLBACK ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData);
-	static VOID CALLBACK TimerCallback(PTP_CALLBACK_INSTANCE instance, PVOID pv, PTP_TIMER timer);
+//	static int32 CVICALLBACK ChangeDetectionCallback(TaskHandle taskHandle, int32 signalID, void *callbackData);
+//	static VOID CALLBACK TimerCallback(PTP_CALLBACK_INSTANCE instance, PVOID pv, PTP_TIMER timer);
 	static UINT nidaqProcedure( LPVOID pParam );
 	static TaskHandle m_taskHandle;
 private:
@@ -48,8 +49,8 @@ public:
 	virtual void AddLine(BYTE lineNumber) = 0;
 	virtual void StartChangeDetection(void);
 	virtual ~CDAQmxDevice(void) = 0;
-protected:
-	CChangeDetection* m_pChangeDetection;
+//protected:
+//	CChangeDetection* m_pChangeDetection;
 };
 
 class CDAQmxM_Series :
@@ -88,6 +89,7 @@ public:
 private:
 	static TaskHandle m_eventMarkerTask;
 	static TaskHandle m_eventMarkerStrobeTask;
+	static CChangeDetection m_changeDetection;
 };
 
 class CDAQmxTask
@@ -112,7 +114,7 @@ public:
 };
 
 class CPulseDetectionLine :
-	public CChangeDetectionLine
+	virtual public CChangeDetectionLine
 {
 public:
 //	CPulseDetectionLine(void);
@@ -124,7 +126,7 @@ public:
 };
 
 class COnOffDetectionLine :
-	public CChangeDetectionLine
+	virtual public CChangeDetectionLine
 {
 public:
 //	COnOffDetectionLine(void);

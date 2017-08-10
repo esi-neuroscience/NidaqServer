@@ -5,7 +5,7 @@
 
 #pragma once
 
-#define DEV2
+//#define DEV2
 
 #ifdef DEV2
 #define DEVICE "Dev2"
