@@ -16,7 +16,8 @@ CDAQmxDevice* CDAQmx::m_pDevice;
 TaskHandle CDAQmx::m_eventMarkerTask;
 TaskHandle CDAQmx::m_eventMarkerStrobeTask;
 TaskHandle CChangeDetection::m_taskHandle;
-char CDAQmxM_Series::m_lines[136] = {0};
+//char CDAQmxM_Series::m_lines[136] = {0};
+char CDAQmxDevice::m_lines[136] = {0};
 BYTE CChangeDetection::m_nLines = 0;
 BYTE CChangeDetection::m_lineMask = 0;
 uInt32 CChangeDetection::m_value;
@@ -49,9 +50,19 @@ void DAQCheckStatus(void)
 }
 
 
+void CDAQmxDevice::AddLine(BYTE lineNumber)
+{
+		char lineName[17] = "Dev1/port2/lineX";
+		lineName[15] = '0'+lineNumber;
+		if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");
+		StringCbCatA(m_lines, 136, lineName);
+		TRACE("Channel: %s\n", m_lines);
+}
+
 void CDAQmxDevice::StartChangeDetection()
 {
-//	m_pChangeDetection->Init();
+	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+	DAQCheckStatus();
 	CChangeDetection::Init();
 	TRACE("Device::StartChangeDetection\n");
 	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
@@ -97,34 +108,25 @@ CString CDAQmxM_Series::ValidChangeDetectionLines(void)
 	return CString(_T("0-2 and 4-6"));
 }
 
-void CDAQmxM_Series::AddLine(BYTE lineNumber)
-{
-		char lineName[17] = "Dev1/port2/lineX";
-		lineName[15] = '0'+lineNumber;
-		if (m_lines[0] != 0) StringCbCatA(m_lines, 136, ",");
-		StringCbCatA(m_lines, 136, lineName);
-		TRACE("Channel: %s\n", m_lines);
-}
-
-void CDAQmxM_Series::StartChangeDetection()
-{
-//	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
-	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
-	DAQCheckStatus();
-//	m_pChangeDetection->Init();
-	TRACE("m_Series::StartChangeDetection\n");
-//	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
-	CDAQmxDevice::StartChangeDetection();
-	//DAQstatus = DAQmxReadDigitalScalarU32(m_pChangeDetection->m_taskHandle, 0.0, &m_value, NULL);
-	//DAQCheckStatus();
-	//m_value &= m_lineMask;
-	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_pChangeDetection->m_taskHandle, m_lines, m_lines, DAQmx_Val_HWTimedSinglePoint, 0);
-	//DAQCheckStatus();
-	//DAQstatus = DAQmxRegisterSignalEvent(m_pChangeDetection->m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, CChangeDetection::ChangeDetectionCallback, NULL);
-	//DAQCheckStatus();
-	//DAQstatus = DAQmxStartTask(m_pChangeDetection->m_taskHandle);
-	//DAQCheckStatus();
-}
+//void CDAQmxM_Series::StartChangeDetection()
+//{
+////	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+//	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+//	DAQCheckStatus();
+////	m_pChangeDetection->Init();
+//	TRACE("m_Series::StartChangeDetection\n");
+////	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+//	CDAQmxDevice::StartChangeDetection();
+//	//DAQstatus = DAQmxReadDigitalScalarU32(m_pChangeDetection->m_taskHandle, 0.0, &m_value, NULL);
+//	//DAQCheckStatus();
+//	//m_value &= m_lineMask;
+//	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_pChangeDetection->m_taskHandle, m_lines, m_lines, DAQmx_Val_HWTimedSinglePoint, 0);
+//	//DAQCheckStatus();
+//	//DAQstatus = DAQmxRegisterSignalEvent(m_pChangeDetection->m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, CChangeDetection::ChangeDetectionCallback, NULL);
+//	//DAQCheckStatus();
+//	//DAQstatus = DAQmxStartTask(m_pChangeDetection->m_taskHandle);
+//	//DAQCheckStatus();
+//}
 
 CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 {
@@ -132,8 +134,8 @@ CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 //	m_pChangeDetection = new CChangeDetection();
 //	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, "Dev1/port2/line4:7", "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 //	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, IOINPUTLINES , "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
-	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, IOINPUTLINES , "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
-	DAQCheckStatus();
+//	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, IOINPUTLINES , "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
+//	DAQCheckStatus();
 }
 
 CDAQmxDigitalIO::~CDAQmxDigitalIO(void)

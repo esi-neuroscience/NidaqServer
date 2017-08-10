@@ -46,11 +46,13 @@ class CDAQmxDevice
 public:
 	virtual bool IsChangeDetectionLineValid(BYTE) = 0;
 	virtual CString ValidChangeDetectionLines(void) = 0;
-	virtual void AddLine(BYTE lineNumber) = 0;
-	virtual void StartChangeDetection(void);
+//	virtual void AddLine(BYTE lineNumber) = 0;
+	void AddLine(BYTE lineNumber);
+//	virtual void StartChangeDetection(void);
+	void StartChangeDetection(void);
 	virtual ~CDAQmxDevice(void) = 0;
-//protected:
-//	CChangeDetection* m_pChangeDetection;
+private:
+	static char m_lines[];
 };
 
 class CDAQmxM_Series :
@@ -61,10 +63,8 @@ public:
 	~CDAQmxM_Series(void);
 	bool IsChangeDetectionLineValid(BYTE);
 	CString ValidChangeDetectionLines(void);
-	void AddLine(BYTE lineNumber);
-	void StartChangeDetection();
-private:
-	static char m_lines[];
+//	void AddLine(BYTE lineNumber);
+//	void StartChangeDetection();
 };
 
 class CDAQmxDigitalIO :
@@ -75,7 +75,7 @@ public:
 	~CDAQmxDigitalIO(void);
 	bool IsChangeDetectionLineValid(BYTE);
 	CString ValidChangeDetectionLines(void);
-	void AddLine(BYTE lineNumber) {};
+//	void AddLine(BYTE lineNumber) {};
 };
 
 class CDAQmx
