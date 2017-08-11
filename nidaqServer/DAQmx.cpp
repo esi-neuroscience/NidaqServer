@@ -59,13 +59,19 @@ void CDAQmxDevice::AddLine(BYTE lineNumber)
 		TRACE("Channel: %s\n", m_lines);
 }
 
-void CDAQmxDevice::StartChangeDetection()
+bool CDAQmxDevice::StartChangeDetection()
 {
+	if (m_lines[0] == 0)
+	{
+		CLog::AddToLog(CString("No lines defined for change detection --> will not start."));
+		return false;
+	}
 	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
 	CChangeDetection::Init();
 	TRACE("Device::StartChangeDetection\n");
 	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
+	return true;
 }
 
 CDAQmxDevice::~CDAQmxDevice(void)
@@ -386,7 +392,7 @@ void CChangeDetection::Init(void)
 
 void CChangeDetection::Start(void)
 {
-	CDAQmx::m_pDevice->StartChangeDetection();
+	if (!CDAQmx::m_pDevice->StartChangeDetection()) return;
 	DAQstatus = DAQmxStartTask(m_taskHandle);
 	DAQCheckStatus();
 }

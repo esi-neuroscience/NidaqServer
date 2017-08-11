@@ -49,7 +49,7 @@ public:
 //	virtual void AddLine(BYTE lineNumber) = 0;
 	void AddLine(BYTE lineNumber);
 //	virtual void StartChangeDetection(void);
-	void StartChangeDetection(void);
+	bool StartChangeDetection(void);
 	virtual ~CDAQmxDevice(void) = 0;
 private:
 	static char m_lines[];
