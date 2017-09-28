@@ -23,6 +23,7 @@ BYTE CChangeDetection::m_lineMask = 0;
 uInt32 CChangeDetection::m_value;
 CChangeDetectionLine* CChangeDetection::m_pLines[8];
 CChangeDetection CDAQmx::m_changeDetection;
+CRITICAL_SECTION CDAQmx::m_eventMarkerSection;
 
 void DAQCheckStatus(void)
 {
@@ -251,6 +252,7 @@ void CDAQmx::Init(void)
 	DAQstatus = DAQmxStartTask(m_eventMarkerStrobeTask);
 	DAQCheckStatus();
 	CReward::Init();
+	InitializeCriticalSection(&m_eventMarkerSection);
 }
 
 bool CDAQmx::IsChangeDetectionLineValid(BYTE lineNumber)
@@ -269,6 +271,7 @@ bool CDAQmx::IsChangeDetectionLineValid(BYTE lineNumber)
 
 void CDAQmx::WriteEventMarker(short* pMarker)
 {
+	EnterCriticalSection(&m_eventMarkerSection);
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
 	DAQCheckStatus();
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 255, NULL);
@@ -276,11 +279,13 @@ void CDAQmx::WriteEventMarker(short* pMarker)
 	Sleep(1);
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 0, NULL);
 	DAQCheckStatus();
+	LeaveCriticalSection(&m_eventMarkerSection);
 }
 
 
 void CDAQmx::Cleanup(void)
 {
+	DeleteCriticalSection(&m_eventMarkerSection);
 	DAQstatus = DAQmxStopTask(m_eventMarkerTask);
 	DAQCheckStatus();
 	DAQstatus = DAQmxClearTask(m_eventMarkerTask);

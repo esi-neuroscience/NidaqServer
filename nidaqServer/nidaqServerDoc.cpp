@@ -29,6 +29,7 @@ END_MESSAGE_MAP()
 
 CnidaqServerDoc::CnidaqServerDoc()
 	: m_rewardTime(100)
+	, m_rewardCode(0)
 {
 	// TODO: add one-time construction code here
 

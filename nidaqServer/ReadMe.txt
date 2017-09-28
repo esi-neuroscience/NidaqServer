@@ -120,6 +120,8 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.5.0 MSt 11-Jul-2017 event marker support
 1.0.5.1 MSt 11-Jul-2017 strobe is line0 (not 1) on 6503
 1.0.6.0 MSt 24-Jul-2017 various code cleanups; ESI icons; error handling
+1.0.7.0 MSt 28-Sep-2017 optional event markers for manual reward
+
 
 
 

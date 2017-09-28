@@ -90,6 +90,7 @@ private:
 	static TaskHandle m_eventMarkerTask;
 	static TaskHandle m_eventMarkerStrobeTask;
 	static CChangeDetection m_changeDetection;
+	static CRITICAL_SECTION m_eventMarkerSection;
 };
 
 class CDAQmxTask

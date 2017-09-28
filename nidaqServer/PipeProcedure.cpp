@@ -134,6 +134,16 @@ UINT PipeProcedure( LPVOID pParam ) {
 					CDAQmx::WriteEventMarker((short*) &commandBuffer.body[0]);
 				}
 				break;
+			case 7: // set eventmarker code for manual reward
+				if (messageLength != 3)
+				{
+					CLog::AddToLog(CString("Command length error in set manual reward marker code."));
+				}
+				else
+				{
+					pDoc->m_rewardCode = *((short*) &commandBuffer.body[0]);
+				}
+				break;
 			}
 		}
 		VERIFY(DisconnectNamedPipe(hPipe));	// neccessary for re-connect
