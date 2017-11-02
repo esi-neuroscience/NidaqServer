@@ -123,10 +123,7 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.7.0 MSt 28-Sep-2017 optional event markers for manual reward
 1.0.8.0 MSt 25-Oct-2017 support for USB-6353
 		MSt  2-Nov-2017 strobes 41µs
-
-
-
-
+1.0.8.1 MSt  2-Nov-2017 check for strobe low time at beginning of marker
 
 
 

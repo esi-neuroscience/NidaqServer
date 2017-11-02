@@ -25,7 +25,7 @@ CChangeDetectionLine* CChangeDetection::m_pLines[8];
 CChangeDetection CDAQmx::m_changeDetection;
 CRITICAL_SECTION CDAQmx::m_eventMarkerSection;
 LARGE_INTEGER CDAQmx::m_41us;
-LARGE_INTEGER CDAQmx::m_startTime;
+LARGE_INTEGER CDAQmx::m_startTime = {0};
 
 void DAQCheckStatus(void)
 {
@@ -295,6 +295,7 @@ void CDAQmx::Delay41us(void)
 void CDAQmx::WriteEventMarker(short* pMarker)
 {
 	int32 sampsWritten = 0;
+	Delay41us();
 	EnterCriticalSection(&m_eventMarkerSection);
 //	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
 //	DAQstatus = DAQmxWriteDigitalLines(m_eventMarkerTask, 1, false, 0, DAQmx_Val_GroupByChannel, (uInt8*) pMarker, &sampsWritten, NULL);
@@ -309,7 +310,7 @@ void CDAQmx::WriteEventMarker(short* pMarker)
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 0, NULL);
 	DAQCheckStatus();
 	QueryPerformanceCounter(&m_startTime);
-	Delay41us();
+//	Delay41us();
 	LeaveCriticalSection(&m_eventMarkerSection);
 }
 
