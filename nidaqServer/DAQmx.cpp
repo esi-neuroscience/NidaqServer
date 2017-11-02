@@ -24,6 +24,8 @@ uInt32 CChangeDetection::m_value;
 CChangeDetectionLine* CChangeDetection::m_pLines[8];
 CChangeDetection CDAQmx::m_changeDetection;
 CRITICAL_SECTION CDAQmx::m_eventMarkerSection;
+LARGE_INTEGER CDAQmx::m_41us;
+LARGE_INTEGER CDAQmx::m_startTime;
 
 void DAQCheckStatus(void)
 {
@@ -218,6 +220,13 @@ void CDAQmx::Init(void)
 	char strobeLine[17] = "Dev1/port2/line7";
 	switch (data)
 	{
+	case DAQmx_Val_XSeriesDAQ:
+		if (StrCmpA(productType, "USB-6353") != 0)
+		{
+			UnsupportedDevice("X-Series", productType);
+		}
+		m_pDevice = new CDAQmxM_Series();
+		break;
 	case DAQmx_Val_MSeriesDAQ:
 		if (StrCmpA(productType, "PCI-6221") != 0)
 		{
@@ -239,9 +248,14 @@ void CDAQmx::Init(void)
 		CLog::AddToLog(temp);
 		break;
 	}
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+	m_41us.QuadPart = frequency.QuadPart / 24414;
 	DAQstatus = DAQmxCreateTask("EventMarkerTask", &m_eventMarkerTask);
+//	DAQstatus = DAQmxCreateTask("", &m_eventMarkerTask);
 	DAQCheckStatus();
-	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev1/port1:0", "eventMarkerChannel", DAQmx_Val_ChanForAllLines);
+//	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev1/port1:0", "eventMarkerChannel", DAQmx_Val_ChanForAllLines);
+	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev1/port1/line0:7, Dev1/port0/line0:7", "", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
 	DAQstatus = DAQmxStartTask(m_eventMarkerTask);
 	DAQCheckStatus();
@@ -269,16 +283,33 @@ bool CDAQmx::IsChangeDetectionLineValid(BYTE lineNumber)
 	return m_pDevice->IsChangeDetectionLineValid(lineNumber);
 }
 
+void CDAQmx::Delay41us(void)
+{
+	LARGE_INTEGER currentTime;
+	do
+	{
+		QueryPerformanceCounter(&currentTime);
+	} while ((currentTime.QuadPart - m_startTime.QuadPart) < m_41us.QuadPart);
+}
+
 void CDAQmx::WriteEventMarker(short* pMarker)
 {
+	int32 sampsWritten = 0;
 	EnterCriticalSection(&m_eventMarkerSection);
-	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
+//	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
+//	DAQstatus = DAQmxWriteDigitalLines(m_eventMarkerTask, 1, false, 0, DAQmx_Val_GroupByChannel, (uInt8*) pMarker, &sampsWritten, NULL);
+	DAQstatus = DAQmxWriteDigitalU16(m_eventMarkerTask,1, false, 0, DAQmx_Val_GroupByChannel, (uInt16*) pMarker, &sampsWritten,NULL);
 	DAQCheckStatus();
+	ASSERT(sampsWritten == 1);
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 255, NULL);
 	DAQCheckStatus();
-	Sleep(1);
+	QueryPerformanceCounter(&m_startTime);
+//	Sleep(1);
+	Delay41us();
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 0, NULL);
 	DAQCheckStatus();
+	QueryPerformanceCounter(&m_startTime);
+	Delay41us();
 	LeaveCriticalSection(&m_eventMarkerSection);
 }
 
@@ -295,7 +326,7 @@ void CDAQmx::Cleanup(void)
 	DAQstatus = DAQmxClearTask(m_eventMarkerStrobeTask);
 	DAQCheckStatus();
 	CReward::Cleanup();
-	m_pDevice->~CDAQmxDevice();
+	if (m_pDevice) m_pDevice->~CDAQmxDevice();
 //	delete m_pDevice;
 }
 
@@ -340,7 +371,7 @@ CESI_Reward::CESI_Reward(void)
 
 CESI_Reward::~CESI_Reward(void)
 {
-	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev1/PFI11");
+	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev4/PFI11");
 	DAQCheckStatus();
 	TRACE("Reward Destruktor\n");
 }

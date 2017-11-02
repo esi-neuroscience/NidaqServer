@@ -87,10 +87,13 @@ public:
 	static void WriteEventMarker(short*);
 	static CDAQmxDevice* m_pDevice;
 private:
+	static void Delay41us(void);
 	static TaskHandle m_eventMarkerTask;
 	static TaskHandle m_eventMarkerStrobeTask;
 	static CChangeDetection m_changeDetection;
 	static CRITICAL_SECTION m_eventMarkerSection;
+	static LARGE_INTEGER m_41us;
+	static LARGE_INTEGER m_startTime;
 };
 
 class CDAQmxTask

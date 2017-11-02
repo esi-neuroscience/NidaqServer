@@ -112,7 +112,7 @@ UINT PipeProcedure( LPVOID pParam ) {
 				{
 					// if messageLength is even, it's caught in the error check to follow
 					// nParams is invalid in this case
-					BYTE nParams = (messageLength-1) / 2;
+					BYTE nParams = (BYTE) ((messageLength-1) / 2);
 					if (EVEN(messageLength) || EVEN(nParams))
 					{
 						CLog::AddToLog(CString("Command length error in start reward sequence."));
