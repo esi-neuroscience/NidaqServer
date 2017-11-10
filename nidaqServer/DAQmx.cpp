@@ -217,6 +217,7 @@ void CDAQmx::Init(void)
 	DAQstatus = DAQmxGetDevProductCategory(DEVICE, &data);
 	DAQCheckStatus();
 	TRACE("Product Category: %d\n", data);
+	char* eventMarkerLines;
 	char strobeLine[17] = "Dev1/port2/line7";
 	switch (data)
 	{
@@ -226,6 +227,7 @@ void CDAQmx::Init(void)
 			UnsupportedDevice("X-Series", productType);
 		}
 		m_pDevice = new CDAQmxM_Series();
+		eventMarkerLines = "Dev1/port0/line0:15";
 		break;
 	case DAQmx_Val_MSeriesDAQ:
 		if (StrCmpA(productType, "PCI-6221") != 0)
@@ -233,6 +235,7 @@ void CDAQmx::Init(void)
 			UnsupportedDevice("M-Series", productType);
 		}
 		m_pDevice = new CDAQmxM_Series();
+		eventMarkerLines = "Dev1/port1:0";
 		break;
 	case DAQmx_Val_DigitalIO:
 		if (StrCmpA(productType, "PCI-6503") != 0)
@@ -240,22 +243,24 @@ void CDAQmx::Init(void)
 			UnsupportedDevice("Digital I/O", productType);
 		}
 		m_pDevice = new CDAQmxDigitalIO();
+		eventMarkerLines = "Dev1/port1:0";
 		strobeLine[15] = '0';
 		break;
 	default:
 		CString temp;
 		temp.Format(_T("Unsupported Product Category: %u"), data);
 		CLog::AddToLog(temp);
+		eventMarkerLines = "Dev1/port1:0";
 		break;
 	}
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 	m_41us.QuadPart = frequency.QuadPart / 24414;
 	DAQstatus = DAQmxCreateTask("EventMarkerTask", &m_eventMarkerTask);
-//	DAQstatus = DAQmxCreateTask("", &m_eventMarkerTask);
 	DAQCheckStatus();
+	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, eventMarkerLines, "eventMarkerChannel", DAQmx_Val_ChanForAllLines);
 //	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev1/port1:0", "eventMarkerChannel", DAQmx_Val_ChanForAllLines);
-	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev1/port1/line0:7, Dev1/port0/line0:7", "", DAQmx_Val_ChanForAllLines);
+//	DAQstatus = DAQmxCreateDOChan(m_eventMarkerTask, "Dev4/port1/line0:7, Dev4/port0/line0:7", "", DAQmx_Val_ChanForAllLines);
 	DAQCheckStatus();
 	DAQstatus = DAQmxStartTask(m_eventMarkerTask);
 	DAQCheckStatus();
@@ -294,14 +299,14 @@ void CDAQmx::Delay41us(void)
 
 void CDAQmx::WriteEventMarker(short* pMarker)
 {
-	int32 sampsWritten = 0;
+//	int32 sampsWritten = 0;
 	Delay41us();
 	EnterCriticalSection(&m_eventMarkerSection);
-//	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
+	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerTask, false, 0, *pMarker, NULL);
 //	DAQstatus = DAQmxWriteDigitalLines(m_eventMarkerTask, 1, false, 0, DAQmx_Val_GroupByChannel, (uInt8*) pMarker, &sampsWritten, NULL);
-	DAQstatus = DAQmxWriteDigitalU16(m_eventMarkerTask,1, false, 0, DAQmx_Val_GroupByChannel, (uInt16*) pMarker, &sampsWritten,NULL);
+//	DAQstatus = DAQmxWriteDigitalU16(m_eventMarkerTask,1, false, 0, DAQmx_Val_GroupByChannel, (uInt16*) pMarker, &sampsWritten,NULL);
 	DAQCheckStatus();
-	ASSERT(sampsWritten == 1);
+//	ASSERT(sampsWritten == 1);
 	DAQstatus = DAQmxWriteDigitalScalarU32(m_eventMarkerStrobeTask, false, 0, 255, NULL);
 	DAQCheckStatus();
 	QueryPerformanceCounter(&m_startTime);
@@ -372,7 +377,7 @@ CESI_Reward::CESI_Reward(void)
 
 CESI_Reward::~CESI_Reward(void)
 {
-	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev4/PFI11");
+	DAQstatus = DAQmxDisconnectTerms("/Dev1/Ctr1InternalOutput", "/Dev1/PFI11");
 	DAQCheckStatus();
 	TRACE("Reward Destruktor\n");
 }
