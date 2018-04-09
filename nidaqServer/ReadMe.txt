@@ -125,6 +125,7 @@ redistributing Visual C++ applications in MSDN documentation.
 		MSt  2-Nov-2017 strobes 41µs
 1.0.8.1 MSt  2-Nov-2017 check for strobe low time at beginning of marker
 1.0.8.2 MSt 10-Nov-2017 USB-6353: use port 0 only for event markers
+1.0.9.0 MSt  5-Apr-2018 optional reward informational messages
 
 
 

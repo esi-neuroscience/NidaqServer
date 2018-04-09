@@ -26,13 +26,14 @@ public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
 
+	bool m_logRewardTriggers;
+
 // Implementation
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
-//private:
-public:
-//	CChangeDetection* m_pChangeDetection;
-//	CDAQmxDevice* m_pDevice;
+
+	afx_msg void OnLogRewardTriggers();
+	afx_msg void OnUpdateLogRewardTriggers(CCmdUI *pCmdUI);
 };
 
 extern CnidaqServerApp theApp;

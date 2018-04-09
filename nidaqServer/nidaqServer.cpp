@@ -24,12 +24,15 @@ BEGIN_MESSAGE_MAP(CnidaqServerApp, CWinApp)
 	// Standard file based document commands
 	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
+	ON_COMMAND(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnLogRewardTriggers)
+	ON_UPDATE_COMMAND_UI(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnUpdateLogRewardTriggers)
 END_MESSAGE_MAP()
 
 
 // CnidaqServerApp construction
 
 CnidaqServerApp::CnidaqServerApp()
+	: m_logRewardTriggers(false)
 {
 	// TODO: replace application ID string below with unique ID string; recommended
 	// format for string is CompanyName.ProductName.SubProduct.VersionInformation
@@ -180,3 +183,17 @@ void CnidaqServerApp::OnAppAbout()
 
 
 
+
+
+void CnidaqServerApp::OnLogRewardTriggers()
+{
+	// TODO: Fügen Sie hier Ihren Befehlsbehandlungscode ein.
+	m_logRewardTriggers = !m_logRewardTriggers;
+}
+
+
+void CnidaqServerApp::OnUpdateLogRewardTriggers(CCmdUI *pCmdUI)
+{
+	// TODO: Fügen Sie hier Ihren Befehlsaktualisierungs-UI-Behandlungscode ein.
+	pCmdUI->SetCheck(m_logRewardTriggers);
+}
