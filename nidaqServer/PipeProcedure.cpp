@@ -144,6 +144,11 @@ UINT PipeProcedure( LPVOID pParam ) {
 					pDoc->m_rewardCode = *((short*) &commandBuffer.body[0]);
 				}
 				break;
+			case 8:	// query total reward time
+				DWORD totalTime;
+				totalTime = CReward::TotalTime();
+				WritePipe(&totalTime, sizeof(DWORD));
+				break;
 			}
 		}
 		VERIFY(DisconnectNamedPipe(hPipe));	// neccessary for re-connect
@@ -154,10 +159,10 @@ UINT PipeProcedure( LPVOID pParam ) {
 	return 0;	// pretend success
 }
 
-//void WritePipe(void* buffer, unsigned char bytesToWrite)
-//{
-//	DWORD bytesWritten;
-//
-//	VERIFY(WriteFile(hPipe, buffer, bytesToWrite, &bytesWritten, NULL));
-//	ASSERT(bytesWritten == bytesToWrite);
-//}
+void WritePipe(void* buffer, unsigned char bytesToWrite)
+{
+	DWORD bytesWritten;
+
+	VERIFY(WriteFile(hPipe, buffer, bytesToWrite, &bytesWritten, NULL));
+	ASSERT(bytesWritten == bytesToWrite);
+}
