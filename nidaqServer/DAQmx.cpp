@@ -230,7 +230,8 @@ void CDAQmx::Init(void)
 		eventMarkerLines = "Dev1/port0/line0:15";
 		break;
 	case DAQmx_Val_MSeriesDAQ:
-		if (StrCmpA(productType, "PCI-6221") != 0)
+		if ((StrCmpA(productType, "PCI-6221") != 0) &&
+			(StrCmpA(productType, "PCIe-6251") != 0))
 		{
 			UnsupportedDevice("M-Series", productType);
 		}

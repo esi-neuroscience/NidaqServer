@@ -127,6 +127,8 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.8.2 MSt 10-Nov-2017 USB-6353: use port 0 only for event markers
 1.0.9.0 MSt  5-Apr-2018 optional reward informational messages
 1.0.10.0 MSt 7-Jun-2018 query total reward time
+1.0.10.1 MSt 16-Aug-2018 support for PCIe-6251
+
 
 
 
