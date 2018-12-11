@@ -231,7 +231,8 @@ void CDAQmx::Init(void)
 		break;
 	case DAQmx_Val_MSeriesDAQ:
 		if ((StrCmpA(productType, "PCI-6221") != 0) &&
-			(StrCmpA(productType, "PCIe-6251") != 0))
+			(StrCmpA(productType, "PCIe-6251") != 0) &&
+			(StrCmpA(productType, "PCIe-6321") != 0))
 		{
 			UnsupportedDevice("M-Series", productType);
 		}
