@@ -39,6 +39,7 @@ CnidaqServerApp::CnidaqServerApp()
 	SetAppID(_T("nidaqServer.AppID.NoVersion"));
 
 	// TODO: add construction code here,
+	VERIFY(m_hDone = CreateEvent(NULL, FALSE, FALSE, L"DaqServerDone"));
 	// Place all significant initialization in InitInstance
 }
 
@@ -122,6 +123,7 @@ BOOL CnidaqServerApp::InitInstance()
 	//  In an SDI app, this should occur after ProcessShellCommand
 	CDAQmx::Init();
 //	m_pChangeDetection = new CChangeDetection();
+	VERIFY(SetEvent(m_hDone));
 
 	return TRUE;
 }
@@ -134,6 +136,8 @@ int CnidaqServerApp::ExitInstance()
 	//delete m_pPhotodiode;
 //	delete m_pDevice;
 	CDAQmx::Cleanup();
+	VERIFY(CloseHandle(m_hDone));
+
 	AfxOleTerm(FALSE);
 
 	return CWinApp::ExitInstance();

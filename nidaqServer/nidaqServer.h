@@ -34,6 +34,8 @@ public:
 
 	afx_msg void OnLogRewardTriggers();
 	afx_msg void OnUpdateLogRewardTriggers(CCmdUI *pCmdUI);
+private:
+	HANDLE m_hDone;
 };
 
 extern CnidaqServerApp theApp;

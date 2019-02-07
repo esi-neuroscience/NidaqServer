@@ -129,7 +129,7 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.10.0 MSt 7-Jun-2018 query total reward time
 1.0.10.1 MSt 16-Aug-2018 support for PCIe-6251
 1.0.10.2 MSt 11-Dec-2018 support for PCIe-6321
-
+1.0.10.3 MSt 07-Feb-2019 added DaqServerDone event
 
 
 
