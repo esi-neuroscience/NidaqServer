@@ -222,17 +222,20 @@ void CDAQmx::Init(void)
 	switch (data)
 	{
 	case DAQmx_Val_XSeriesDAQ:
-		if (StrCmpA(productType, "USB-6353") != 0)
+		if ((StrCmpA(productType, "USB-6353") != 0) &&
+			(StrCmpA(productType, "PCIe-6321") != 0))
 		{
 			UnsupportedDevice("X-Series", productType);
 		}
 		m_pDevice = new CDAQmxM_Series();
-		eventMarkerLines = "Dev1/port0/line0:15";
+		if (StrCmpA(productType, "USB-6353") == 0)
+			eventMarkerLines = "Dev1/port0/line0:15";
+		else
+			eventMarkerLines = "Dev1/port1:0";
 		break;
 	case DAQmx_Val_MSeriesDAQ:
 		if ((StrCmpA(productType, "PCI-6221") != 0) &&
-			(StrCmpA(productType, "PCIe-6251") != 0) &&
-			(StrCmpA(productType, "PCIe-6321") != 0))
+			(StrCmpA(productType, "PCIe-6251") != 0))
 		{
 			UnsupportedDevice("M-Series", productType);
 		}
