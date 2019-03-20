@@ -8,6 +8,7 @@
 
 #pragma comment(lib, "NIDAQmx.lib")
 
+extern HANDLE hDaqServerDone;
 int32 DAQstatus;
 
 // extern CnidaqServerApp theApp;
@@ -176,6 +177,7 @@ CString CDAQmxDigitalIO::ValidChangeDetectionLines(void)
 UINT CChangeDetection::nidaqProcedure( LPVOID pParam ) {
 	
 	uInt32 value = 0;
+	VERIFY(SetEvent(hDaqServerDone));
 	while (true)
 	{
 		DAQstatus = DAQmxReadDigitalScalarU32(m_taskHandle, 0.0, &value, NULL);
@@ -439,7 +441,11 @@ void CChangeDetection::Init(void)
 
 void CChangeDetection::Start(void)
 {
-	if (!CDAQmx::m_pDevice->StartChangeDetection()) return;
+	if (!CDAQmx::m_pDevice->StartChangeDetection())
+	{
+		VERIFY(SetEvent(hDaqServerDone));
+		return;
+	}
 	DAQstatus = DAQmxStartTask(m_taskHandle);
 	DAQCheckStatus();
 }

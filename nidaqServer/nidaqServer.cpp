@@ -16,6 +16,8 @@
 #define new DEBUG_NEW
 #endif
 
+extern HANDLE hPipeDone;
+HANDLE hDaqServerDone;
 
 // CnidaqServerApp
 
@@ -39,7 +41,7 @@ CnidaqServerApp::CnidaqServerApp()
 	SetAppID(_T("nidaqServer.AppID.NoVersion"));
 
 	// TODO: add construction code here,
-	VERIFY(m_hDone = CreateEvent(NULL, FALSE, FALSE, L"DaqServerDone"));
+	VERIFY(hDaqServerDone = CreateEvent(NULL, FALSE, FALSE, L"DaqServerDone"));
 	// Place all significant initialization in InitInstance
 }
 
@@ -114,6 +116,7 @@ BOOL CnidaqServerApp::InitInstance()
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 
+	VERIFY(hPipeDone = CreateEvent(NULL, false, false, NULL));
 	VERIFY(AfxBeginThread(PipeProcedure, NULL));
 //	AfxBeginThread(nidaqProcedure, NULL);
 	// The one and only window has been initialized, so show and update it
@@ -122,8 +125,10 @@ BOOL CnidaqServerApp::InitInstance()
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
 	CDAQmx::Init();
+	VERIFY(WAIT_OBJECT_0 == WaitForSingleObject(hPipeDone, INFINITE));
+	VERIFY(CloseHandle(hPipeDone));
 //	m_pChangeDetection = new CChangeDetection();
-	VERIFY(SetEvent(m_hDone));
+	VERIFY(SetEvent(hDaqServerDone));
 
 	return TRUE;
 }
@@ -136,7 +141,7 @@ int CnidaqServerApp::ExitInstance()
 	//delete m_pPhotodiode;
 //	delete m_pDevice;
 	CDAQmx::Cleanup();
-	VERIFY(CloseHandle(m_hDone));
+	VERIFY(CloseHandle(hDaqServerDone));
 
 	AfxOleTerm(FALSE);
 

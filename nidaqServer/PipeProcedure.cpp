@@ -5,7 +5,9 @@
 #include "Reward.h"
 #include "Log.h"
 
+extern HANDLE hDaqServerDone;
 HANDLE hPipe;
+HANDLE hPipeDone;
 
 bool IsAddChangeDetectionLineValid(BYTE lineNumber)
 {
@@ -45,7 +47,7 @@ UINT PipeProcedure( LPVOID pParam ) {
 		0,			// default time out 50ms
 		NULL);
 	ASSERT(hPipe != INVALID_HANDLE_VALUE);
-
+	VERIFY(SetEvent(hPipeDone));
 	// Documentation of "CreateNamedPipe Function" states:
 	// The pipe server should not perform a blocking read operation until the pipe client has started.
 	// Otherwise, a race condition can occur. This typically occurs when initialization code, such as
@@ -92,6 +94,7 @@ UINT PipeProcedure( LPVOID pParam ) {
 				if (CChangeDetection::Running())
 				{
 					CLog::AddToLog(CString("Will not start running task."));
+					VERIFY(SetEvent(hDaqServerDone));
 				}
 				else
 				{

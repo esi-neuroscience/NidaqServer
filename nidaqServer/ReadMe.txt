@@ -131,5 +131,5 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.10.2 MSt 11-Dec-2018 support for PCIe-6321
 1.0.10.3 MSt 07-Feb-2019 added DaqServerDone event
 1.0.10.4 MSt 16-Mar-2019 realized that PCIe-6321 is X-Series device
-
+1.0.10.5 MSt 20-Mar-2019 set DaqServerDone event when starting change detection
 
