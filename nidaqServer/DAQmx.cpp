@@ -226,7 +226,8 @@ void CDAQmx::Init(void)
 	case DAQmx_Val_XSeriesDAQ:
 		if ((StrCmpA(productType, "USB-6353") != 0) &&
 			(StrCmpA(productType, "PCIe-6321") != 0) &&
-			(StrCmpA(productType, "PCIe-6323") != 0))
+			(StrCmpA(productType, "PCIe-6323") != 0) &&
+			(StrCmpA(productType, "PCIe-6351") != 0))
 		{
 			UnsupportedDevice("X-Series", productType);
 		}
