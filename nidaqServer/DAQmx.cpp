@@ -1,7 +1,9 @@
+#pragma once
+
 #include "StdAfx.h"
 #include "DAQmx.h"
 #include "nidaqServer.h"
-#include "Reward.h"
+//#include "Reward.h"
 #include "Log.h"
 #include <strsafe.h>
 //#include "nidaqProcedure.h"
@@ -11,7 +13,7 @@
 extern HANDLE hDaqServerDone;
 int32 DAQstatus;
 
-// extern CnidaqServerApp theApp;
+ extern CnidaqServerApp theApp;
 
 CDAQmxDevice* CDAQmx::m_pDevice;
 TaskHandle CDAQmx::m_eventMarkerTask;
@@ -80,7 +82,6 @@ bool CDAQmxDevice::StartChangeDetection()
 
 CDAQmxDevice::~CDAQmxDevice(void)
 {
-//	delete m_pChangeDetection;
 //	DAQstatus = DAQmxClearTask(m_taskHandle);
 //	DAQCheckStatus();
 	TRACE("DAQmxDevice Destruktor\n");
@@ -90,12 +91,10 @@ CDAQmxDevice::~CDAQmxDevice(void)
 CDAQmxM_Series::CDAQmxM_Series(void)
 {
 	TRACE("DAQmxM_Series Konstruktor\n");
-//	m_pChangeDetection = new CChangeDetection();
 }
 
 CDAQmxM_Series::~CDAQmxM_Series(void)
 {
-//	delete m_pChangeDetection;
 	TRACE("DAQmxM_Series Destruktor\n");
 }
 
@@ -120,37 +119,23 @@ CString CDAQmxM_Series::ValidChangeDetectionLines(void)
 
 //void CDAQmxM_Series::StartChangeDetection()
 //{
-////	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 //	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, m_lines, "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 //	DAQCheckStatus();
-////	m_pChangeDetection->Init();
 //	TRACE("m_Series::StartChangeDetection\n");
 ////	AfxBeginThread(CChangeDetection::nidaqProcedure, NULL);
 //	CDAQmxDevice::StartChangeDetection();
-//	//DAQstatus = DAQmxReadDigitalScalarU32(m_pChangeDetection->m_taskHandle, 0.0, &m_value, NULL);
-//	//DAQCheckStatus();
 //	//m_value &= m_lineMask;
-//	//DAQstatus = DAQmxCfgChangeDetectionTiming(m_pChangeDetection->m_taskHandle, m_lines, m_lines, DAQmx_Val_HWTimedSinglePoint, 0);
-//	//DAQCheckStatus();
-//	//DAQstatus = DAQmxRegisterSignalEvent(m_pChangeDetection->m_taskHandle, DAQmx_Val_ChangeDetectionEvent, 0, CChangeDetection::ChangeDetectionCallback, NULL);
-//	//DAQCheckStatus();
-//	//DAQstatus = DAQmxStartTask(m_pChangeDetection->m_taskHandle);
-//	//DAQCheckStatus();
 //}
 
 CDAQmxDigitalIO::CDAQmxDigitalIO(void)
 {
 	TRACE("DAQmxDigitalIO Konstruktor\n");
-//	m_pChangeDetection = new CChangeDetection();
-//	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, "Dev1/port2/line4:7", "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
-//	DAQstatus = DAQmxCreateDIChan(m_pChangeDetection->m_taskHandle, IOINPUTLINES , "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 //	DAQstatus = DAQmxCreateDIChan(CChangeDetection::m_taskHandle, IOINPUTLINES , "ChangeDetectionLines", DAQmx_Val_ChanForAllLines);
 //	DAQCheckStatus();
 }
 
 CDAQmxDigitalIO::~CDAQmxDigitalIO(void)
 {
-//	delete m_pChangeDetection;
 	TRACE("DAQmxDigitalIO Destruktor\n");
 }
 
@@ -280,7 +265,7 @@ void CDAQmx::Init(void)
 	DAQCheckStatus();
 	DAQstatus = DAQmxStartTask(m_eventMarkerStrobeTask);
 	DAQCheckStatus();
-	CReward::Init();
+//	CReward::Init();
 	InitializeCriticalSection(&m_eventMarkerSection);
 }
 
@@ -341,7 +326,7 @@ void CDAQmx::Cleanup(void)
 	DAQCheckStatus();
 	DAQstatus = DAQmxClearTask(m_eventMarkerStrobeTask);
 	DAQCheckStatus();
-	CReward::Cleanup();
+//	CReward::Cleanup();
 	if (m_pDevice) m_pDevice->~CDAQmxDevice();
 //	delete m_pDevice;
 }

@@ -6,12 +6,13 @@
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "nidaqServer.h"
+//#include "nidaqServer.h"
 #endif
 
 #include "nidaqServerDoc.h"
+//#include "Reward.h"
 
-#include <propkey.h>
+//#include <propkey.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,24 +20,31 @@
 
 // CnidaqServerDoc
 
+CauxLine* CnidaqServerDoc::m_pauxLines[8];
+
 IMPLEMENT_DYNCREATE(CnidaqServerDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CnidaqServerDoc, CDocument)
+//	ON_COMMAND(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnLogRewardTriggers)
+//	ON_UPDATE_COMMAND_UI(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnUpdateLogRewardTriggers)
+	ON_COMMAND(ID_LOG_REWARDTRIGGERS, &CnidaqServerDoc::OnLogRewardTriggers)
+	ON_UPDATE_COMMAND_UI(ID_LOG_REWARDTRIGGERS, &CnidaqServerDoc::OnUpdateLogRewardTriggers)
 END_MESSAGE_MAP()
 
 
 // CnidaqServerDoc construction/destruction
 
 CnidaqServerDoc::CnidaqServerDoc()
-	: m_rewardTime(100)
-	, m_rewardCode(0)
+//	: m_rewardTime(100)
+//	, m_rewardCode(0)
 {
 	// TODO: add one-time construction code here
-
+	m_pauxLines[3] = new CReward();
 }
 
 CnidaqServerDoc::~CnidaqServerDoc()
 {
+	delete m_pauxLines[3];
 }
 
 BOOL CnidaqServerDoc::OnNewDocument()
@@ -137,3 +145,18 @@ void CnidaqServerDoc::Dump(CDumpContext& dc) const
 
 
 // CnidaqServerDoc commands
+
+void CnidaqServerDoc::OnLogRewardTriggers()
+{
+	// TODO: Fügen Sie hier Ihren Befehlsbehandlungscode ein.
+	((CReward*)m_pauxLines[3])->m_logPulseTriggers = !((CReward*)m_pauxLines[3])->m_logPulseTriggers;
+//	m_logRewardTriggers = !m_logRewardTriggers;
+}
+
+
+void CnidaqServerDoc::OnUpdateLogRewardTriggers(CCmdUI* pCmdUI)
+{
+	// TODO: Fügen Sie hier Ihren Befehlsaktualisierungs-UI-Behandlungscode ein.
+	pCmdUI->SetCheck(((CReward*)m_pauxLines[3])->m_logPulseTriggers);
+//	pCmdUI->SetCheck(m_logRewardTriggers);
+}

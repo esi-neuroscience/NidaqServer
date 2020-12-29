@@ -3,7 +3,7 @@
 //
 
 #include "stdafx.h"
-#include "afxwinappex.h"
+//#include "afxwinappex.h"
 #include "afxdialogex.h"
 #include "nidaqServer.h"
 #include "MainFrm.h"
@@ -11,6 +11,7 @@
 #include "nidaqServerDoc.h"
 #include "nidaqServerView.h"
 #include "PipeProcedure.h"
+#include "DAQmx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,8 +27,8 @@ BEGIN_MESSAGE_MAP(CnidaqServerApp, CWinApp)
 	// Standard file based document commands
 	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
-	ON_COMMAND(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnLogRewardTriggers)
-	ON_UPDATE_COMMAND_UI(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnUpdateLogRewardTriggers)
+//	ON_COMMAND(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnLogRewardTriggers)
+//	ON_UPDATE_COMMAND_UI(ID_LOG_REWARDTRIGGERS, &CnidaqServerApp::OnUpdateLogRewardTriggers)
 END_MESSAGE_MAP()
 
 
@@ -41,7 +42,8 @@ CnidaqServerApp::CnidaqServerApp()
 	SetAppID(_T("nidaqServer.AppID.NoVersion"));
 
 	// TODO: add construction code here,
-	VERIFY(hDaqServerDone = CreateEvent(NULL, FALSE, FALSE, L"DaqServerDone"));
+//	VERIFY(hDaqServerDone = CreateEvent(NULL, FALSE, FALSE, L"DaqServerDone"));
+	VERIFY(hDaqServerDone = CreateEvent(NULL, FALSE, FALSE, "DaqServerDone"));
 	// Place all significant initialization in InitInstance
 }
 
@@ -127,7 +129,6 @@ BOOL CnidaqServerApp::InitInstance()
 	CDAQmx::Init();
 	VERIFY(WAIT_OBJECT_0 == WaitForSingleObject(hPipeDone, INFINITE));
 	VERIFY(CloseHandle(hPipeDone));
-//	m_pChangeDetection = new CChangeDetection();
 	VERIFY(SetEvent(hDaqServerDone));
 
 	return TRUE;
@@ -193,7 +194,7 @@ void CnidaqServerApp::OnAppAbout()
 
 
 
-
+/*
 void CnidaqServerApp::OnLogRewardTriggers()
 {
 	// TODO: Fügen Sie hier Ihren Befehlsbehandlungscode ein.
@@ -206,3 +207,4 @@ void CnidaqServerApp::OnUpdateLogRewardTriggers(CCmdUI *pCmdUI)
 	// TODO: Fügen Sie hier Ihren Befehlsaktualisierungs-UI-Behandlungscode ein.
 	pCmdUI->SetCheck(m_logRewardTriggers);
 }
+*/

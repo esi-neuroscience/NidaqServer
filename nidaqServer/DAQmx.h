@@ -9,6 +9,8 @@
 //static int32 DAQstatus;
 //static void DAQCheckStatus(void);
 
+char* EventNameCopy(char* eventName);
+
 class CChangeDetectionLine
 {
 public:

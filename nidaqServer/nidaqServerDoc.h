@@ -4,7 +4,8 @@
 
 
 #pragma once
-
+#include "resource.h"       // main symbols
+#include "Reward.h"
 
 class CnidaqServerDoc : public CDocument
 {
@@ -14,8 +15,9 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	short m_rewardTime;
-	short m_rewardCode;
+//	short m_rewardTime;
+//	short m_rewardCode;
+	static CauxLine* m_pauxLines[8];
 
 // Operations
 public:
@@ -37,11 +39,11 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-protected:
-
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLogRewardTriggers();
+	afx_msg void OnUpdateLogRewardTriggers(CCmdUI* pCmdUI);
 
 #ifdef SHARED_HANDLERS
 	// Helper function that sets search content for a Search Handler

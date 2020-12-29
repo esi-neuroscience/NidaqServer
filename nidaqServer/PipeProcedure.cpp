@@ -2,7 +2,8 @@
 #include "PipeProcedure.h"
 #include "nidaqServer.h"
 #include "nidaqServerDoc.h"
-#include "Reward.h"
+//#include "Reward.h"
+#include "DAQmx.h"
 #include "Log.h"
 
 extern HANDLE hDaqServerDone;
@@ -16,7 +17,7 @@ bool IsAddChangeDetectionLineValid(BYTE lineNumber)
 		CLog::AddToLog(CString("Will not add line to running task."));
 		return false;
 	}
-	return CDAQmx::IsChangeDetectionLineValid(lineNumber);
+	return true;
 }
 
 
@@ -71,6 +72,8 @@ UINT PipeProcedure( LPVOID pParam ) {
 			}
 			if (error == ERROR_BROKEN_PIPE) break;
 			ASSERT(error == 0);
+			BYTE lineNumber = 255;
+			short pulseTime = 0;
 			switch (commandBuffer.type)
 			{
 			case 1:	// add pulse-line to change detection
@@ -101,14 +104,26 @@ UINT PipeProcedure( LPVOID pParam ) {
 					CChangeDetection::Start();
 				}
 				break;
-			case 4: // set reward pulse duration
-				if (messageLength != 3)
+			case 4: // set output pulse duration
+				lineNumber = 255;
+				pulseTime = 0;
+				switch (messageLength)
 				{
-					CLog::AddToLog(CString("Command length error in set reward pulse duration."));
+				case 3:
+					lineNumber = 3;	// reward (is default)
+					pulseTime = *((short*)&commandBuffer.body[0]);
+					break;
+				case 4:
+					lineNumber = commandBuffer.body[0];
+					pulseTime = *((short*)&commandBuffer.body[1]);
+					break;
+				default:
+					CLog::AddToLog(CString("Command length error in set output pulse duration."));
+					break;
 				}
-				else
+				if (lineNumber != 255)
 				{
-					pDoc->m_rewardTime = *((short*) &commandBuffer.body[0]);
+					((CReward*)pDoc->m_pauxLines[lineNumber])->m_rewardTime = pulseTime;
 				}
 				break;
 			case 5: // start reward sequence
@@ -122,7 +137,8 @@ UINT PipeProcedure( LPVOID pParam ) {
 					}
 					else
 					{
-						CReward::StartSequence(nParams, (short*) &commandBuffer.body[0]);
+						((CReward*)pDoc->m_pauxLines[3])->StartSequence(nParams, (short*)&commandBuffer.body[0]);
+				//		CReward::StartSequence(nParams, (short*) &commandBuffer.body[0]);
 					}
 				}
 				break;
@@ -144,13 +160,28 @@ UINT PipeProcedure( LPVOID pParam ) {
 				}
 				else
 				{
-					pDoc->m_rewardCode = *((short*) &commandBuffer.body[0]);
+					((CReward*)pDoc->m_pauxLines[3])->m_rewardCode = *((short*)&commandBuffer.body[0]);
 				}
 				break;
 			case 8:	// query total reward time
 				DWORD totalTime;
-				totalTime = CReward::TotalTime();
+				totalTime = ((CReward*)pDoc->m_pauxLines[3])->TotalTime();
 				WritePipe(&totalTime, sizeof(DWORD));
+				break;
+			case 9:	// add output pulse line
+				lineNumber = commandBuffer.body[0];
+				if (pDoc->m_pauxLines[lineNumber])	// check if line is valid (still unused)
+				{
+					CString errstr;
+					errstr.Format("Can't use line %u for pulse output", lineNumber);	//TODO:: is already used for "name"
+					CLog::AddToLog(errstr);
+				}
+				else
+				{
+					char* pulseName = (char*)&commandBuffer.body[1];
+					TRACE("Pulse Line Name: %s\n", pulseName);
+					pDoc->m_pauxLines[lineNumber] = new CPulseLine(lineNumber, pulseName);
+				}
 				break;
 			}
 		}

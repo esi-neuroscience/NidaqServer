@@ -3,7 +3,7 @@
 //
 
 #include "stdafx.h"
-#include "nidaqServer.h"
+//#include "nidaqServer.h"
 
 #include "MainFrm.h"
 

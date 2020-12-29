@@ -134,3 +134,4 @@ redistributing Visual C++ applications in MSDN documentation.
 1.0.10.5 MSt 20-Mar-2019 set DaqServerDone event when starting change detection
 1.0.10.6 MSt  7-May-2019 support for PCIe-6323
 1.0.10.7 MSt 14-Nov-2019 support for PCIe-6351
+1.0.11.0 MSt 30-Oct-2020 support for output pulse lines
